@@ -1,0 +1,27 @@
+     1                                  section .data
+     2                                      ;int main(int argc, char** argv)
+     3                                      ;variables que almacenan los argumentos pasados al 
+     4                                      ;programa.
+     5                                      ;argcstr db 'argc = %d\n\0'
+     6                                      ;argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
+     7 00000000 686F6C610A00                mensaje db "hola",0xA,0
+     8                                      sys_stdout equ 1
+     9                                  section .bss
+    10 00000000 <res 00000008>              argc resq 1
+    11                                  section .text
+    12                                  global main
+    13                                  main:
+    14 00000000 4158                        pop r8          ;Guardar el numero de argumentos (int argc)
+    15 00000002 4159                        pop r9
+    16 00000004 55                          push rbp        ;Guarda el stack frame de main.
+    17 00000005 4889E5                      mov rbp, rsp
+    18                                  
+    19 00000008 B801000000                  mov rax, 1
+    20 0000000D BF01000000                  mov rdi, 1
+    21 00000012 4C89CE                      mov rsi, r9
+    22 00000015 BA64000000                  mov rdx, 100
+    23 0000001A 0F05                        syscall
+    24                                  
+    25 0000001C 4889EC                      mov rsp, rbp
+    26 0000001F 5D                          pop rbp
+    27 00000020 C3                      ret
