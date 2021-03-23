@@ -11,7 +11,7 @@
     10 00000009 5C6E5C30           
     11 0000000D 617267765B25755D20-         argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
     11 00000016 3D2025735C6E5C30   
-    12 0000001E 686F6C612025690A00          mensaje db "hola %i",0xA,0
+    12 0000001E 686F6C612025640A00          mensaje db "hola %d",0xA,0
     13                                      sys_stdout equ 1
     14                                  section .bss
     15 00000000 <res 00000008>              argc resq 1
@@ -22,26 +22,31 @@
     20 00000000 55                          push rbp        ;Guarda el stack frame de main.
     21 00000001 4889E5                      mov rbp, rsp
     22                                  
-    23 00000004 4831DB                      xor rbx,rbx                     ;Limpiamos rbx.
-    24                                      ;mov [argc], rdi                 ;Guardamos el numero de argumentos.
-    25                                      ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
-    26                                      ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
-    27 00000007 8A1E                        mov bl, [rsi]
-    28                                      ;sub byte bl, '0'
-    29 00000009 881C25[08000000]            mov [nDesplazamientos], bl
-    30                                  
-    31                                      ;mov rax, 1
-    32                                      ;mov rdi, 1
-    33                                      ;mov rsi, mensaje
-    34                                      ;mov rdx, 5
-    35                                      ;syscall
-    36                                  
-    37 00000010 48BF-                       mov rdi, mensaje
-    37 00000012 [1E00000000000000] 
-    38 0000001A B800000000                  mov rax, 0
-    39 0000001F 488B3425[08000000]          mov rsi, [nDesplazamientos]
-    40 00000027 E8(00000000)                call printf
-    41                                      
-    42 0000002C 4889EC                      mov rsp, rbp
-    43 0000002F 5D                          pop rbp
-    44 00000030 C3                      ret
+    23 00000004 4831C0                      xor rax,rax                       ;Limpiamos r8.
+    24 00000007 4831D2                      xor rdx, rdx                         ;Limpiamos rdx.
+    25 0000000A 48893C25[00000000]          mov [argc], rdi                 ;Guardamos el numero de argumentos.
+    26 00000012 488B4608                    mov rax, [rsi+8]           ;Direccion de memoria de argv[1] en r8.
+    27 00000016 488B10                      mov rdx, [rax]
+    28 00000019 80EA30                      sub dl, '0'
+    29 0000001C 881425[08000000]            mov [nDesplazamientos], byte dl
+    30                                      ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
+    31                                      ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
+    32                                      ;mov bl, [rsi]
+    33                                      ;sub byte bl, '0'
+    34                                      ;mov [nDesplazamientos], bl
+    35                                  
+    36                                      ;mov rax, 1
+    37                                      ;mov rdi, 1
+    38                                      ;mov rsi, mensaje
+    39                                      ;mov rdx, 5
+    40                                      ;syscall
+    41                                  
+    42 00000023 48BF-                       mov rdi, mensaje
+    42 00000025 [1E00000000000000] 
+    43 0000002D B800000000                  mov rax, 0
+    44 00000032 488B3425[08000000]          mov rsi, [nDesplazamientos]
+    45 0000003A E8(00000000)                call printf
+    46                                      
+    47 0000003F 4889EC                      mov rsp, rbp
+    48 00000042 5D                          pop rbp
+    49 00000043 C3                      ret

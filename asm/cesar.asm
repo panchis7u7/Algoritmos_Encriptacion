@@ -9,7 +9,7 @@ section .data
     ;eso significa que argc esta en %rdi y argv en %rsi.
     argcstr db 'argc = %i\n\0'
     argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
-    mensaje db "hola %i",0xA,0
+    mensaje db "hola %d",0xA,0
     sys_stdout equ 1
 section .bss
     argc resq 1
@@ -17,22 +17,17 @@ section .bss
 section .text
 global main
 main:
-    push rbp        ;Guarda el stack frame de main.
-    mov rbp, rsp
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
 
-    xor rbx,rbx                     ;Limpiamos rbx.
-    ;mov [argc], rdi                 ;Guardamos el numero de argumentos.
-    ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
-    ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
-    mov bl, [rsi]
-    ;sub byte bl, '0'
-    mov [nDesplazamientos], bl
+    xor rax,rax                         ;Limpiamos r8.
+    xor rdx, rdx                        ;Limpiamos rdx.
+    mov [argc], rdi                     ;Guardamos el numero de argumentos.
+    mov rax, [rsi+8]                    ;Direccion de memoria de argv[1] en r8.
+    mov rdx, [rax]                      ;Desreferencia *argv[1].
+    sub dl, '0'                         ;Convertimos de string a int.
+    mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
 
-    ;mov rax, 1
-    ;mov rdi, 1
-    ;mov rsi, mensaje
-    ;mov rdx, 5
-    ;syscall
 
     mov rdi, mensaje
     mov rax, 0
