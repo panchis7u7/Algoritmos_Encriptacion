@@ -20,7 +20,7 @@ main:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 
-    xor rax,rax                         ;Limpiamos r8.
+    xor rax,rax                         ;Limpiamos rax.
     xor rdx, rdx                        ;Limpiamos rdx.
     mov [argc], rdi                     ;Guardamos el numero de argumentos.
     mov rax, [rsi+8]                    ;Direccion de memoria de argv[1] en r8.
