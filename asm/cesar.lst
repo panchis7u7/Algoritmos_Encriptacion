@@ -1,27 +1,47 @@
-     1                                  section .data
-     2                                      ;int main(int argc, char** argv)
-     3                                      ;variables que almacenan los argumentos pasados al 
-     4                                      ;programa.
-     5                                      ;argcstr db 'argc = %d\n\0'
-     6                                      ;argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
-     7 00000000 686F6C610A00                mensaje db "hola",0xA,0
-     8                                      sys_stdout equ 1
-     9                                  section .bss
-    10 00000000 <res 00000008>              argc resq 1
-    11                                  section .text
-    12                                  global main
-    13                                  main:
-    14 00000000 4158                        pop r8          ;Guardar el numero de argumentos (int argc)
-    15 00000002 4159                        pop r9
-    16 00000004 55                          push rbp        ;Guarda el stack frame de main.
-    17 00000005 4889E5                      mov rbp, rsp
-    18                                  
-    19 00000008 B801000000                  mov rax, 1
-    20 0000000D BF01000000                  mov rdi, 1
-    21 00000012 4C89CE                      mov rsi, r9
-    22 00000015 BA64000000                  mov rdx, 100
-    23 0000001A 0F05                        syscall
-    24                                  
-    25 0000001C 4889EC                      mov rsp, rbp
-    26 0000001F 5D                          pop rbp
-    27 00000020 C3                      ret
+     1                                  extern printf
+     2                                  section .data
+     3                                      ;int main(int argc, char** argv)
+     4                                      ;variables que almacenan los argumentos pasados al 
+     5                                      ;programa.
+     6                                      ;------------------------------------------------------
+     7                                      ;El orden de los registros: 
+     8                                      ;%rdi, %rsi, %rdx, %rcx, %r8 and %r9 
+     9                                      ;eso significa que argc esta en %rdi y argv en %rsi.
+    10 00000000 61726763203D202569-         argcstr db 'argc = %i\n\0'
+    10 00000009 5C6E5C30           
+    11 0000000D 617267765B25755D20-         argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
+    11 00000016 3D2025735C6E5C30   
+    12 0000001E 686F6C612025690A00          mensaje db "hola %i",0xA,0
+    13                                      sys_stdout equ 1
+    14                                  section .bss
+    15 00000000 <res 00000008>              argc resq 1
+    16 00000008 <res 00000001>              nDesplazamientos resb 1
+    17                                  section .text
+    18                                  global main
+    19                                  main:
+    20 00000000 55                          push rbp        ;Guarda el stack frame de main.
+    21 00000001 4889E5                      mov rbp, rsp
+    22                                  
+    23 00000004 4831DB                      xor rbx,rbx                     ;Limpiamos rbx.
+    24                                      ;mov [argc], rdi                 ;Guardamos el numero de argumentos.
+    25                                      ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
+    26                                      ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
+    27 00000007 8A1E                        mov bl, [rsi]
+    28                                      ;sub byte bl, '0'
+    29 00000009 881C25[08000000]            mov [nDesplazamientos], bl
+    30                                  
+    31                                      ;mov rax, 1
+    32                                      ;mov rdi, 1
+    33                                      ;mov rsi, mensaje
+    34                                      ;mov rdx, 5
+    35                                      ;syscall
+    36                                  
+    37 00000010 48BF-                       mov rdi, mensaje
+    37 00000012 [1E00000000000000] 
+    38 0000001A B800000000                  mov rax, 0
+    39 0000001F 488B3425[08000000]          mov rsi, [nDesplazamientos]
+    40 00000027 E8(00000000)                call printf
+    41                                      
+    42 0000002C 4889EC                      mov rsp, rbp
+    43 0000002F 5D                          pop rbp
+    44 00000030 C3                      ret

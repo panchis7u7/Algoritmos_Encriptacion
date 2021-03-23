@@ -1,30 +1,44 @@
+extern printf
 section .data
     ;int main(int argc, char** argv)
     ;variables que almacenan los argumentos pasados al 
     ;programa.
-    ;argcstr db 'argc = %d\n\0'
-    ;argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
-    mensaje db "hola",0xA,0
+    ;------------------------------------------------------
+    ;El orden de los registros: 
+    ;%rdi, %rsi, %rdx, %rcx, %r8 and %r9 
+    ;eso significa que argc esta en %rdi y argv en %rsi.
+    argcstr db 'argc = %i\n\0'
+    argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
+    mensaje db "hola %i",0xA,0
     sys_stdout equ 1
 section .bss
-    argc resb 8
-    argv resb 8
+    argc resq 1
+    nDesplazamientos resb 1
 section .text
 global main
 main:
-    mov rax,0       ;Limpiamos el registro RAX.
-    lea argv, rax   ;RAX apunta a argv.
-    pop rax          ;Guardar el numero de argumentos (int argc)
-    pop r9
     push rbp        ;Guarda el stack frame de main.
     mov rbp, rsp
 
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, r9
-    mov rdx, 100
-    syscall
+    xor rbx,rbx                     ;Limpiamos rbx.
+    ;mov [argc], rdi                 ;Guardamos el numero de argumentos.
+    ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
+    ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
+    mov bl, [rsi]
+    ;sub byte bl, '0'
+    mov [nDesplazamientos], bl
 
+    ;mov rax, 1
+    ;mov rdi, 1
+    ;mov rsi, mensaje
+    ;mov rdx, 5
+    ;syscall
+
+    mov rdi, mensaje
+    mov rax, 0
+    mov rsi, [nDesplazamientos]
+    call printf
+    
     mov rsp, rbp
     pop rbp
 ret
