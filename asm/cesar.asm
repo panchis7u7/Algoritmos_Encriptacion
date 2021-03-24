@@ -11,16 +11,31 @@ section .data
     ;El orden de los registros: 
     ;%rdi, %rsi, %rdx, %rcx, %r8 and %r9 
     ;eso significa que argc esta en %rdi y argv en %rsi.
-    formatoRotaciones db 'El numero de desplazamientos es %d.',0xA,0x0
-    formatoTexto db "El mensaje a encriptar es: %s.",0xA,0x0
-    fewArgumentsError db "Error en los argumentos!.",0xA,0x0
+
+    %define INICIO_ASCII_MINUSCULAS 97
+    %define INICIO_ASCII_MAYUSCULAS 65
+    %define LONGITUD_ALFABETO 26
+    %define KNRM  `\x1B[0m`
+    %define KRED  `\x1B[31m`
+    %define KGRN  `\x1B[32m`
+    %define KYEL  `\x1B[33m`
+    %define KBLU  `\x1B[34m`
+    %define KMAG  `\x1B[35m`
+    %define KCYN  `\x1B[36m`
+    %define KWHT  `\x1B[37m`
+
+    strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
+    nombreAplicacion db KYEL,`\t\tCifrado de Cesar!\n`,0xA,0x0
+    formatoRotaciones db KCYN,`El numero de desplazamientos es %d.`,0xA,0x0
+    formatoTexto db `El mensaje a encriptar es: %s.`,0xA,0x0
+    fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
     fewArgumentsErrorLen equ $-fewArgumentsError
     STDOUT_FILENO equ 0x01
     STDERR_FILENO equ 0x02
 section .bss
     argc resq 1
-    nDesplazamientos resb 1
-    mensaje resb 1
+    nDesplazamientos resq 1
+    mensaje resq 1
 section .text
 global main
 main:
@@ -38,7 +53,7 @@ main:
 
     ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
     ;--------------------------------------------------------------------------
-
+    ;add rsp, 8
     xor rax,rax                         ;Limpiamos rax.
     xor rdx, rdx                        ;Limpiamos rdx.
     mov [argc], rdi                     ;Guardamos el numero de argumentos.
@@ -46,18 +61,50 @@ main:
     mov rdx, [rax]                      ;Desreferencia *argv[1].
     sub dl, '0'                         ;Convertimos de string a int.
     mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
-    ;mov r8, [rsi+16]
-    ;mov [mensaje], r8
+
+    push rdi                            ;Guardar el valor del registro rdi.
+    push rax                            ;Guardar el valor del registro rax.
+    push rsi                            ;Guardar el valor del registro rsi.
+    sub rsp, 8                          ;Alinear la pila.
+
+    mov rdi, strLimite
+    mov rax, 0
+    call printf
+    
+    mov rdi, nombreAplicacion
+    mov rax, 0
+    call printf
 
     mov rdi, formatoRotaciones          ;Formato de la cadena.
     mov rax, 0                          ;No se usaron registros de punto flotante
     mov rsi, [nDesplazamientos]         ;Numero de desplazamientos en formato int
     call printf                         ;Se llama la funcion externa 'printf.'
 
-    ;mov rdi, formatoTexto               ;Formato del texto plano.
-    ;mov rax, 0                          ;No se usaron registros de punto flotante
-    ;mov rsi, [mensaje]
-    ;call printf
+    add rsp, 8                          ;Re-establecer la pila.
+    pop rsi                             ;Re-establecer el registo rsi.
+    pop rax                             ;Re-establecer el registo rax.
+    pop rdi                             ;Re-establecer el registo rdi.
+
+
+    mov r8, [rsi+16]
+    mov [mensaje], r8
+
+    push rdi                            ;Guardar el valor del registro rdi.
+    push rax                            ;Guardar el valor del registro rax.
+    push rsi                            ;Guardar el valor del registro rsi.
+    sub rsp, 8                          ;Alinear la pila.
+
+
+
+    mov rdi, formatoTexto               ;Formato del texto plano.
+    mov rax, 0                          ;No se usaron registros de punto flotante
+    mov rsi, [mensaje]
+    call printf
+
+    add rsp, 8                          ;Re-establecer la pila.
+    pop rsi                             ;Re-establecer el registo rsi.
+    pop rax                             ;Re-establecer el registo rax.
+    pop rdi                             ;Re-establecer el registo rdi.
 
     mov rsp, rbp
     pop rbp

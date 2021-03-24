@@ -86,10 +86,10 @@ char* desencriptar(int desplazamientos, char* mensaje){
     for(i = 0; i < strlen(mensaje); ++i){
         if(!isupper(mensaje[i]) && isalpha(mensaje[i]))
             mensaje[i] = (char)(MOD(((int)mensaje[i]) - INICIO_ASCII_MINUSCULAS -
-            desplazamientos, LONGITUD_ALFABETO)+'a');
+            desplazamientos, LONGITUD_ALFABETO) + 'a');
         else if(isupper(mensaje[i]) && isalpha(mensaje[i]))
             mensaje[i] = (char)(MOD(((int)mensaje[i]) - INICIO_ASCII_MAYUSCULAS -
-            desplazamientos, LONGITUD_ALFABETO)+'A');
+            desplazamientos, LONGITUD_ALFABETO) + 'A');
         else mensaje[i] = mensaje[i];
     }
     return mensaje;
