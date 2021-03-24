@@ -27,7 +27,8 @@ section .data
     strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
     nombreAplicacion db KYEL,`\t\tCifrado de Cesar!\n`,0xA,0x0
     formatoRotaciones db KCYN,`El numero de desplazamientos es %d.\n`,0xA,0x0
-    formatoTexto db KWHT,`El mensaje a encriptar es: `, KYEL, `%s.`,0xA,0x0
+    formatoTextoCrypt db KWHT,`El mensaje a encriptar es: `, KYEL, `%s`,0xA,0x0
+    formatoTextoDecrypt db KWHT,`El mensaje encriptado es: `, KYEL, `%s`,0xA,0x0
     fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
     fewArgumentsErrorLen equ $-fewArgumentsError
     STDOUT_FILENO equ 0x01
@@ -52,6 +53,21 @@ main:
 
     ;--------------------------------------------------------------------------
 
+    ;Verificar los argumentos.
+    ;--------------------------------------------------------------------------
+    
+    mov rcx, [rsi+16]
+    mov rax, "--crypt"
+    cmp [rcx], rax
+    je jmp_crypt
+
+
+jmp_crypt:
+    call encriptar
+    jmp exit_error
+
+    ;--------------------------------------------------------------------------    
+
     ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
     ;--------------------------------------------------------------------------
     ;add rsp, 8
@@ -68,11 +84,11 @@ main:
     push rsi                            ;Guardar el valor del registro rsi.
     sub rsp, 8                          ;Alinear la pila.
 
-    mov rdi, strLimite
+    mov rdi, strLimite                  ;Imprimir el borde punteado.
     mov rax, 0
     call printf
-    
-    mov rdi, nombreAplicacion
+
+    mov rdi, nombreAplicacion           ;Imprimir el nombre de la aplicacion.
     mov rax, 0
     call printf
 
@@ -87,7 +103,7 @@ main:
     pop rdi                             ;Re-establecer el registo rdi.
 
 
-    mov r8, [rsi+16]
+    mov r8, [rsi+24]
     mov [mensaje], r8
 
     push rdi                            ;Guardar el valor del registro rdi.
@@ -96,8 +112,7 @@ main:
     sub rsp, 8                          ;Alinear la pila.
 
 
-
-    mov rdi, formatoTexto               ;Formato del texto plano.
+    mov rdi, formatoTextoCrypt               ;Formato del texto plano.
     mov rax, 0                          ;No se usaron registros de punto flotante
     mov rsi, [mensaje]
     call printf
@@ -112,6 +127,29 @@ main:
     ret
 
     ;--------------------------------------------------------------------------
+
+    ;Funciones.
+    ;--------------------------------------------------------------------------
+
+encriptar:
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
+
+    mov rsp, rbp
+    pop rbp
+    ret
+
+desencriptar:
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
+
+    mov rsp, rbp
+    pop rbp
+    ret
+    
+    ;--------------------------------------------------------------------------
+
+
 exit_error:                             ;Salida con error.
     mov rax, 1
     mov rdi, STDERR_FILENO              ;Llamada de systema (write), que escribe al

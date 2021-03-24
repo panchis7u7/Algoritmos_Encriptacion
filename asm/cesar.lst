@@ -39,112 +39,147 @@
     29 0000006C 646573706C617A616D-
     29 00000075 69656E746F73206573-
     29 0000007E 2025642E0A0A00     
-    30 00000085 1B5B33376D456C206D-         formatoTexto db KWHT,`El mensaje a encriptar es: `, KYEL, `%s.`,0xA,0x0
+    30 00000085 1B5B33376D456C206D-         formatoTextoCrypt db KWHT,`El mensaje a encriptar es: `, KYEL, `%s`,0xA,0x0
     30 0000008E 656E73616A65206120-
     30 00000097 656E63726970746172-
     30 000000A0 2065733A201B5B3333-
-    30 000000A9 6D25732E0A00       
-    31 000000AF 4572726F7220656E20-         fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
-    31 000000B8 6C6F7320617267756D-
-    31 000000C1 656E746F73212E0A00 
-    32                                      fewArgumentsErrorLen equ $-fewArgumentsError
-    33                                      STDOUT_FILENO equ 0x01
-    34                                      STDERR_FILENO equ 0x02
-    35                                      
-    36                                  section .bss
-    37 00000000 <res 00000008>              argc resq 1
-    38 00000008 <res 00000008>              nDesplazamientos resq 1
-    39 00000010 <res 00000008>              mensaje resq 1
-    40                                  section .text
-    41                                  global main
-    42                                  main:
-    43 00000000 55                          push rbp                            ;Guarda el apuntador de la base de
-    44 00000001 4889E5                      mov rbp, rsp                        ;la pila.
-    45                                  
-    46                                      ;Verificar si se ingresaron los argumentos necesarios.
-    47                                      ;(numero de desplazamientos y el texto a cifrar).
-    48                                      ;--------------------------------------------------------------------------
-    49                                      
-    50 00000004 4883FF03                    cmp rdi,3
-    51 00000008 0F8CAC000000                jl exit_error
-    52                                  
-    53                                      ;--------------------------------------------------------------------------
-    54                                  
-    55                                      ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
-    56                                      ;--------------------------------------------------------------------------
-    57                                      ;add rsp, 8
-    58 0000000E 4831C0                      xor rax,rax                         ;Limpiamos rax.
-    59 00000011 4831D2                      xor rdx, rdx                        ;Limpiamos rdx.
-    60 00000014 48893C25[00000000]          mov [argc], rdi                     ;Guardamos el numero de argumentos.
-    61 0000001C 488B4608                    mov rax, [rsi+8]                    ;Direccion de memoria de argv[1] en r8.
-    62 00000020 488B10                      mov rdx, [rax]                      ;Desreferencia *argv[1].
-    63 00000023 80EA30                      sub dl, '0'                         ;Convertimos de string a int.
-    64 00000026 881425[08000000]            mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
-    65                                  
-    66 0000002D 57                          push rdi                            ;Guardar el valor del registro rdi.
-    67 0000002E 50                          push rax                            ;Guardar el valor del registro rax.
-    68 0000002F 56                          push rsi                            ;Guardar el valor del registro rsi.
-    69 00000030 4883EC08                    sub rsp, 8                          ;Alinear la pila.
+    30 000000A9 6D25730A00         
+    31 000000AE 1B5B33376D456C206D-         formatoTextoDecrypt db KWHT,`El mensaje encriptado es: `, KYEL, `%s`,0xA,0x0
+    31 000000B7 656E73616A6520656E-
+    31 000000C0 637269707461646F20-
+    31 000000C9 65733A201B5B33336D-
+    31 000000D2 25730A00           
+    32 000000D6 4572726F7220656E20-         fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
+    32 000000DF 6C6F7320617267756D-
+    32 000000E8 656E746F73212E0A00 
+    33                                      fewArgumentsErrorLen equ $-fewArgumentsError
+    34                                      STDOUT_FILENO equ 0x01
+    35                                      STDERR_FILENO equ 0x02
+    36                                      
+    37                                  section .bss
+    38 00000000 <res 00000008>              argc resq 1
+    39 00000008 <res 00000008>              nDesplazamientos resq 1
+    40 00000010 <res 00000008>              mensaje resq 1
+    41                                  section .text
+    42                                  global main
+    43                                  main:
+    44 00000000 55                          push rbp                            ;Guarda el apuntador de la base de
+    45 00000001 4889E5                      mov rbp, rsp                        ;la pila.
+    46                                  
+    47                                      ;Verificar si se ingresaron los argumentos necesarios.
+    48                                      ;(numero de desplazamientos y el texto a cifrar).
+    49                                      ;--------------------------------------------------------------------------
+    50                                      
+    51 00000004 4883FF03                    cmp rdi,3
+    52 00000008 0F8CD2000000                jl exit_error
+    53                                  
+    54                                      ;--------------------------------------------------------------------------
+    55                                  
+    56                                      ;Verificar los argumentos.
+    57                                      ;--------------------------------------------------------------------------
+    58                                      
+    59 0000000E 488B4E10                    mov rcx, [rsi+16]
+    60 00000012 48B82D2D6372797074-         mov rax, "--crypt"
+    60 0000001B 00                 
+    61 0000001C 483901                      cmp [rcx], rax
+    62 0000001F 7400                        je jmp_crypt
+    63                                  
+    64                                  
+    65                                  jmp_crypt:
+    66 00000021 E8B1000000                  call encriptar
+    67 00000026 E9B5000000                  jmp exit_error
+    68                                  
+    69                                      ;--------------------------------------------------------------------------    
     70                                  
-    71 00000034 48BF-                       mov rdi, strLimite
-    71 00000036 [0000000000000000] 
-    72 0000003E B800000000                  mov rax, 0
-    73 00000043 E8(00000000)                call printf
-    74                                      
-    75 00000048 48BF-                       mov rdi, nombreAplicacion
-    75 0000004A [3F00000000000000] 
-    76 00000052 B800000000                  mov rax, 0
-    77 00000057 E8(00000000)                call printf
-    78                                  
-    79 0000005C 48BF-                       mov rdi, formatoRotaciones          ;Formato de la cadena.
-    79 0000005E [5A00000000000000] 
-    80 00000066 B800000000                  mov rax, 0                          ;No se usaron registros de punto flotante
-    81 0000006B 488B3425[08000000]          mov rsi, [nDesplazamientos]         ;Numero de desplazamientos en formato int
-    82 00000073 E8(00000000)                call printf                         ;Se llama la funcion externa 'printf.'
-    83                                  
-    84 00000078 4883C408                    add rsp, 8                          ;Re-establecer la pila.
-    85 0000007C 5E                          pop rsi                             ;Re-establecer el registo rsi.
-    86 0000007D 58                          pop rax                             ;Re-establecer el registo rax.
-    87 0000007E 5F                          pop rdi                             ;Re-establecer el registo rdi.
-    88                                  
-    89                                  
-    90 0000007F 4C8B4610                    mov r8, [rsi+16]
-    91 00000083 4C890425[10000000]          mov [mensaje], r8
-    92                                  
-    93 0000008B 57                          push rdi                            ;Guardar el valor del registro rdi.
-    94 0000008C 50                          push rax                            ;Guardar el valor del registro rax.
-    95 0000008D 56                          push rsi                            ;Guardar el valor del registro rsi.
-    96 0000008E 4883EC08                    sub rsp, 8                          ;Alinear la pila.
-    97                                  
-    98                                  
+    71                                      ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
+    72                                      ;--------------------------------------------------------------------------
+    73                                      ;add rsp, 8
+    74 0000002B 4831C0                      xor rax,rax                         ;Limpiamos rax.
+    75 0000002E 4831D2                      xor rdx, rdx                        ;Limpiamos rdx.
+    76 00000031 48893C25[00000000]          mov [argc], rdi                     ;Guardamos el numero de argumentos.
+    77 00000039 488B4608                    mov rax, [rsi+8]                    ;Direccion de memoria de argv[1] en r8.
+    78 0000003D 488B10                      mov rdx, [rax]                      ;Desreferencia *argv[1].
+    79 00000040 80EA30                      sub dl, '0'                         ;Convertimos de string a int.
+    80 00000043 881425[08000000]            mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
+    81                                  
+    82 0000004A 57                          push rdi                            ;Guardar el valor del registro rdi.
+    83 0000004B 50                          push rax                            ;Guardar el valor del registro rax.
+    84 0000004C 56                          push rsi                            ;Guardar el valor del registro rsi.
+    85 0000004D 4883EC08                    sub rsp, 8                          ;Alinear la pila.
+    86                                  
+    87 00000051 48BF-                       mov rdi, strLimite                  ;Imprimir el borde punteado.
+    87 00000053 [0000000000000000] 
+    88 0000005B B800000000                  mov rax, 0
+    89 00000060 E8(00000000)                call printf
+    90                                  
+    91 00000065 48BF-                       mov rdi, nombreAplicacion           ;Imprimir el nombre de la aplicacion.
+    91 00000067 [3F00000000000000] 
+    92 0000006F B800000000                  mov rax, 0
+    93 00000074 E8(00000000)                call printf
+    94                                  
+    95 00000079 48BF-                       mov rdi, formatoRotaciones          ;Formato de la cadena.
+    95 0000007B [5A00000000000000] 
+    96 00000083 B800000000                  mov rax, 0                          ;No se usaron registros de punto flotante
+    97 00000088 488B3425[08000000]          mov rsi, [nDesplazamientos]         ;Numero de desplazamientos en formato int
+    98 00000090 E8(00000000)                call printf                         ;Se llama la funcion externa 'printf.'
     99                                  
-   100 00000092 48BF-                       mov rdi, formatoTexto               ;Formato del texto plano.
-   100 00000094 [8500000000000000] 
-   101 0000009C B800000000                  mov rax, 0                          ;No se usaron registros de punto flotante
-   102 000000A1 488B3425[10000000]          mov rsi, [mensaje]
-   103 000000A9 E8(00000000)                call printf
+   100 00000095 4883C408                    add rsp, 8                          ;Re-establecer la pila.
+   101 00000099 5E                          pop rsi                             ;Re-establecer el registo rsi.
+   102 0000009A 58                          pop rax                             ;Re-establecer el registo rax.
+   103 0000009B 5F                          pop rdi                             ;Re-establecer el registo rdi.
    104                                  
-   105 000000AE 4883C408                    add rsp, 8                          ;Re-establecer la pila.
-   106 000000B2 5E                          pop rsi                             ;Re-establecer el registo rsi.
-   107 000000B3 58                          pop rax                             ;Re-establecer el registo rax.
-   108 000000B4 5F                          pop rdi                             ;Re-establecer el registo rdi.
-   109                                  
-   110 000000B5 4889EC                      mov rsp, rbp
-   111 000000B8 5D                          pop rbp
-   112 000000B9 C3                          ret
+   105                                  
+   106 0000009C 4C8B4618                    mov r8, [rsi+24]
+   107 000000A0 4C890425[10000000]          mov [mensaje], r8
+   108                                  
+   109 000000A8 57                          push rdi                            ;Guardar el valor del registro rdi.
+   110 000000A9 50                          push rax                            ;Guardar el valor del registro rax.
+   111 000000AA 56                          push rsi                            ;Guardar el valor del registro rsi.
+   112 000000AB 4883EC08                    sub rsp, 8                          ;Alinear la pila.
    113                                  
-   114                                      ;--------------------------------------------------------------------------
-   115                                  exit_error:                             ;Salida con error.
-   116 000000BA B801000000                  mov rax, 1
-   117 000000BF BF02000000                  mov rdi, STDERR_FILENO              ;Llamada de systema (write), que escribe al
-   118 000000C4 48BE-                       mov rsi, fewArgumentsError          ;descriptor de archivos stderr.
-   118 000000C6 [AF00000000000000] 
-   119 000000CE BA1B000000                  mov rdx, fewArgumentsErrorLen
-   120 000000D3 0F05                        syscall                             ;Se imprime mensaje de error.
-   121                                  
-   122 000000D5 4889EC                      mov rsp, rbp
-   123 000000D8 5D                          pop rbp 
+   114                                  
+   115 000000AF 48BF-                       mov rdi, formatoTextoCrypt               ;Formato del texto plano.
+   115 000000B1 [8500000000000000] 
+   116 000000B9 B800000000                  mov rax, 0                          ;No se usaron registros de punto flotante
+   117 000000BE 488B3425[10000000]          mov rsi, [mensaje]
+   118 000000C6 E8(00000000)                call printf
+   119                                  
+   120 000000CB 4883C408                    add rsp, 8                          ;Re-establecer la pila.
+   121 000000CF 5E                          pop rsi                             ;Re-establecer el registo rsi.
+   122 000000D0 58                          pop rax                             ;Re-establecer el registo rax.
+   123 000000D1 5F                          pop rdi                             ;Re-establecer el registo rdi.
    124                                  
-   125 000000D9 B83C000000                  mov rax, 60                         ;Se sale del programa de manera insatisfactoria
-   126 000000DE 48C7C7FFFFFFFF              mov rdi,-1                          ;con valor de retorno de -1.
-   127 000000E5 0F05                        syscall
+   125 000000D2 4889EC                      mov rsp, rbp
+   126 000000D5 5D                          pop rbp
+   127 000000D6 C3                          ret
+   128                                  
+   129                                      ;--------------------------------------------------------------------------
+   130                                  
+   131                                      ;Funciones.
+   132                                      ;--------------------------------------------------------------------------
+   133                                  
+   134                                  encriptar:
+   135 000000D7 55                          push rbp                            ;Guarda el apuntador de la base de
+   136 000000D8 4889E5                      mov rbp, rsp                        ;la pila.
+   137                                  
+   138 000000DB 4889EC                      mov rsp, rbp
+   139 000000DE 5D                          pop rbp
+   140 000000DF C3                          ret
+   141                                  
+   142                                      ;--------------------------------------------------------------------------
+   143                                  
+   144                                  
+   145                                  exit_error:                             ;Salida con error.
+   146 000000E0 B801000000                  mov rax, 1
+   147 000000E5 BF02000000                  mov rdi, STDERR_FILENO              ;Llamada de systema (write), que escribe al
+   148 000000EA 48BE-                       mov rsi, fewArgumentsError          ;descriptor de archivos stderr.
+   148 000000EC [D600000000000000] 
+   149 000000F4 BA1B000000                  mov rdx, fewArgumentsErrorLen
+   150 000000F9 0F05                        syscall                             ;Se imprime mensaje de error.
+   151                                  
+   152 000000FB 4889EC                      mov rsp, rbp
+   153 000000FE 5D                          pop rbp 
+   154                                  
+   155 000000FF B83C000000                  mov rax, 60                         ;Se sale del programa de manera insatisfactoria
+   156 00000104 48C7C7FFFFFFFF              mov rdi,-1                          ;con valor de retorno de -1.
+   157 0000010B 0F05                        syscall
