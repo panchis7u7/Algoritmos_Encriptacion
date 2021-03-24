@@ -71,6 +71,9 @@ exit_error:                             ;Salida con error.
     mov rdx, fewArgumentsErrorLen
     syscall                             ;Se imprime mensaje de error.
 
+    mov rsp, rbp
+    pop rbp 
+
     mov rax, 60                         ;Se sale del programa de manera insatisfactoria
     mov rdi,-1                          ;con valor de retorno de -1.
     syscall
