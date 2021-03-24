@@ -53,24 +53,9 @@ main:
 
     ;--------------------------------------------------------------------------
 
-    ;Verificar los argumentos.
+     ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
     ;--------------------------------------------------------------------------
-    
-    mov rcx, [rsi+16]
-    mov rax, "--crypt"
-    cmp [rcx], rax
-    je jmp_crypt
 
-
-jmp_crypt:
-    call encriptar
-    jmp exit_error
-
-    ;--------------------------------------------------------------------------    
-
-    ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
-    ;--------------------------------------------------------------------------
-    ;add rsp, 8
     xor rax,rax                         ;Limpiamos rax.
     xor rdx, rdx                        ;Limpiamos rdx.
     mov [argc], rdi                     ;Guardamos el numero de argumentos.
@@ -79,6 +64,13 @@ jmp_crypt:
     sub dl, '0'                         ;Convertimos de string a int.
     mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
 
+    mov r8, [rsi+24]
+    mov [mensaje], r8
+
+    ;--------------------------------------------------------------------------
+
+    ;Imprimir marco y contexto de la aplicacion.
+    ;--------------------------------------------------------------------------
     push rdi                            ;Guardar el valor del registro rdi.
     push rax                            ;Guardar el valor del registro rax.
     push rsi                            ;Guardar el valor del registro rsi.
@@ -101,20 +93,36 @@ jmp_crypt:
     pop rsi                             ;Re-establecer el registo rsi.
     pop rax                             ;Re-establecer el registo rax.
     pop rdi                             ;Re-establecer el registo rdi.
+    ;--------------------------------------------------------------------------
+
+    ;Verificar los argumentos.
+    ;--------------------------------------------------------------------------
+    
+    mov rcx, [rsi+16]
+    mov rax, "--crypt"
+    cmp [rcx], rax
+    je jmp_crypt
+
+    jmp exit_error
 
 
-    mov r8, [rsi+24]
-    mov [mensaje], r8
+jmp_crypt:
+    call encriptar
+    jmp exito
+
+    ;--------------------------------------------------------------------------    
+
+    ;Todo salio con exito!
+    ;--------------------------------------------------------------------------
+exito:
 
     push rdi                            ;Guardar el valor del registro rdi.
     push rax                            ;Guardar el valor del registro rax.
     push rsi                            ;Guardar el valor del registro rsi.
     sub rsp, 8                          ;Alinear la pila.
 
-
-    mov rdi, formatoTextoCrypt               ;Formato del texto plano.
-    mov rax, 0                          ;No se usaron registros de punto flotante
-    mov rsi, [mensaje]
+    mov rdi, strLimite                  ;Imprimir el borde punteado.
+    mov rax, 0
     call printf
 
     add rsp, 8                          ;Re-establecer la pila.
@@ -135,6 +143,22 @@ encriptar:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 
+    push rdi                            ;Guardar el valor del registro rdi.
+    push rax                            ;Guardar el valor del registro rax.
+    push rsi                            ;Guardar el valor del registro rsi.
+    sub rsp, 8                          ;Alinear la pila.
+
+
+    mov rdi, formatoTextoCrypt          ;Formato del texto plano.
+    mov rax, 0                          ;No se usaron registros de punto flotante
+    mov rsi, [mensaje]
+    call printf
+
+    add rsp, 8                          ;Re-establecer la pila.
+    pop rsi                             ;Re-establecer el registo rsi.
+    pop rax                             ;Re-establecer el registo rax.
+    pop rdi                             ;Re-establecer el registo rdi.
+
     mov rsp, rbp
     pop rbp
     ret
@@ -146,7 +170,7 @@ desencriptar:
     mov rsp, rbp
     pop rbp
     ret
-    
+
     ;--------------------------------------------------------------------------
 
 
@@ -156,6 +180,20 @@ exit_error:                             ;Salida con error.
     mov rsi, fewArgumentsError          ;descriptor de archivos stderr.
     mov rdx, fewArgumentsErrorLen
     syscall                             ;Se imprime mensaje de error.
+
+    push rdi                            ;Guardar el valor del registro rdi.
+    push rax                            ;Guardar el valor del registro rax.
+    push rsi                            ;Guardar el valor del registro rsi.
+    sub rsp, 8                          ;Alinear la pila.
+
+    mov rdi, strLimite                  ;Imprimir el borde punteado.
+    mov rax, 0
+    call printf
+
+    add rsp, 8                          ;Re-establecer la pila.
+    pop rsi                             ;Re-establecer el registo rsi.
+    pop rax                             ;Re-establecer el registo rax.
+    pop rdi                             ;Re-establecer el registo rdi.
 
     mov rsp, rbp
     pop rbp 
