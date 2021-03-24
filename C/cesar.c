@@ -21,36 +21,48 @@
 #define INICIO_ASCII_MINUSCULAS 97
 #define INICIO_ASCII_MAYUSCULAS 65
 #define LONGITUD_ALFABETO 26
-#define MOD(i, n) (i % n + n) % n
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
 
-//./cesar 5 --crypt [texto a cifrar]
-//./cesar 5 --decrypt [texto a cifrar]
+//Calculo de modulo positivo.
+#define MOD(i, n) (i % n + n) % n
 
 char* encriptar(int desplazamientos, char* mensaje);
 char* desencriptar(int desplazamientos, char* mensajeEncriptado);
 
 int main(int argc, char** argv){
     if(argc < 4){
-        fprintf(stderr, "Error en los argumentos!\n");
+        fprintf(stderr, "%sError en los argumentos!\n", KRED);
         return -1;
     }
 
+    printf("%s--------------------------------------------------------\n", KCYN);
+    printf("\t\t%sCifrado de Cesar!\n\n", KYEL);
+
     int desplazamientos = (int)((*argv[1])-'0');
-    printf("El numero de desplazamientos es %d.\n", desplazamientos);
+    printf("%sEl numero de desplazamientos es %d.\n\n", KCYN, desplazamientos);
     char* mensaje = argv[3];
 
     if(strcmp(argv[2], "--crypt") == 0){
-        printf("El mensaje a encriptar es: %s.\n", mensaje);
+        printf("%sEl mensaje a encriptar es: %s%s\n", KWHT, KYEL, mensaje);
         mensaje = encriptar(desplazamientos, mensaje);
-        printf("El mensaje encriptado es: %s.\n", mensaje);
+        printf("%sEl mensaje encriptado es: %s%s\n\n", KWHT, KYEL, mensaje);
     } else if(strcmp(argv[2], "--decrypt") == 0){
-        printf("El mensaje a desencriptar es: '%s'.\n", mensaje);
+        printf("%sEl mensaje a desencriptar es: %s%s\n", KWHT, KYEL, mensaje);
         mensaje = desencriptar(desplazamientos, mensaje);
-        printf("El mensaje desencriptado es: '%s'.\n", mensaje);
+        printf("%sEl mensaje desencriptado es: %s%s\n\n", KWHT, KYEL, mensaje);
     } else {
-        fprintf(stderr, "El argumento '%s', no esta definido!\n", argv[2]);
+        fprintf(stderr, "%sEl argumento '%s', no esta definido!\n\n", KRED, argv[2]);
         exit(-1);
     }
+
+    printf("%s--------------------------------------------------------\n", KCYN);
 
     return 0;
 }
