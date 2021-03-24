@@ -1,52 +1,87 @@
-     1                                  extern printf
-     2                                  section .data
-     3                                      ;int main(int argc, char** argv)
-     4                                      ;variables que almacenan los argumentos pasados al 
-     5                                      ;programa.
-     6                                      ;------------------------------------------------------
-     7                                      ;El orden de los registros: 
-     8                                      ;%rdi, %rsi, %rdx, %rcx, %r8 and %r9 
-     9                                      ;eso significa que argc esta en %rdi y argv en %rsi.
-    10 00000000 61726763203D202569-         argcstr db 'argc = %i\n\0'
-    10 00000009 5C6E5C30           
-    11 0000000D 617267765B25755D20-         argvstr db 'argv[%u] = %s\n\0'  ;%u -> unsigned int
-    11 00000016 3D2025735C6E5C30   
-    12 0000001E 686F6C612025640A00          mensaje db "hola %d",0xA,0
-    13                                      sys_stdout equ 1
-    14                                  section .bss
-    15 00000000 <res 00000008>              argc resq 1
-    16 00000008 <res 00000001>              nDesplazamientos resb 1
-    17                                  section .text
-    18                                  global main
-    19                                  main:
-    20 00000000 55                          push rbp        ;Guarda el stack frame de main.
-    21 00000001 4889E5                      mov rbp, rsp
-    22                                  
-    23 00000004 4831C0                      xor rax,rax                       ;Limpiamos r8.
-    24 00000007 4831D2                      xor rdx, rdx                         ;Limpiamos rdx.
-    25 0000000A 48893C25[00000000]          mov [argc], rdi                 ;Guardamos el numero de argumentos.
-    26 00000012 488B4608                    mov rax, [rsi+8]           ;Direccion de memoria de argv[1] en r8.
-    27 00000016 488B10                      mov rdx, [rax]
-    28 00000019 80EA30                      sub dl, '0'
-    29 0000001C 881425[08000000]            mov [nDesplazamientos], byte dl
-    30                                      ;mov r8, qword [rsi+8]           ;Guardamos el primer argumento, el cual
-    31                                      ;mov [nDesplazamientos], r8      ;debe ser el numero de rotaciones.
-    32                                      ;mov bl, [rsi]
-    33                                      ;sub byte bl, '0'
-    34                                      ;mov [nDesplazamientos], bl
-    35                                  
-    36                                      ;mov rax, 1
-    37                                      ;mov rdi, 1
-    38                                      ;mov rsi, mensaje
-    39                                      ;mov rdx, 5
-    40                                      ;syscall
+     1                                  ;--------------------------------------------------------------------------------
+     2                                  ;Cifrado Cesar - Carlos Sebastian Madrigal Rodriguez
+     3                                  ;23 de Marzo, 2021
+     4                                  ;--------------------------------------------------------------------------------
+     5                                  extern printf
+     6                                  section .data
+     7                                      ;int main(int argc, char** argv)
+     8                                      ;variables que almacenan los argumentos pasados al 
+     9                                      ;programa.
+    10                                      ;------------------------------------------------------
+    11                                      ;El orden de los registros: 
+    12                                      ;%rdi, %rsi, %rdx, %rcx, %r8 and %r9 
+    13                                      ;eso significa que argc esta en %rdi y argv en %rsi.
+    14 00000000 456C206E756D65726F-         formatoRotaciones db 'El numero de desplazamientos es %d.',0xA,0x0
+    14 00000009 20646520646573706C-
+    14 00000012 617A616D69656E746F-
+    14 0000001B 732065732025642E0A-
+    14 00000024 00                 
+    15 00000025 456C206D656E73616A-         formatoTexto db "El mensaje a encriptar es: %s.",0xA,0x0
+    15 0000002E 65206120656E637269-
+    15 00000037 707461722065733A20-
+    15 00000040 25732E0A00         
+    16 00000045 4572726F7220656E20-         fewArgumentsError db "Error en los argumentos!.",0xA,0x0
+    16 0000004E 6C6F7320617267756D-
+    16 00000057 656E746F73212E0A00 
+    17                                      fewArgumentsErrorLen equ $-fewArgumentsError
+    18                                      STDOUT_FILENO equ 0x01
+    19                                      STDERR_FILENO equ 0x02
+    20                                  section .bss
+    21 00000000 <res 00000008>              argc resq 1
+    22 00000008 <res 00000001>              nDesplazamientos resb 1
+    23 00000009 <res 00000001>              mensaje resb 1
+    24                                  section .text
+    25                                  global main
+    26                                  main:
+    27 00000000 55                          push rbp                            ;Guarda el apuntador de la base de
+    28 00000001 4889E5                      mov rbp, rsp                        ;la pila.
+    29                                  
+    30                                      ;Verificar si se ingresaron los argumentos necesarios.
+    31                                      ;(numero de desplazamientos y el texto a cifrar).
+    32                                      ;--------------------------------------------------------------------------
+    33                                      
+    34 00000004 4883FF03                    cmp rdi,3
+    35 00000008 7C40                        jl exit_error
+    36                                  
+    37                                      ;--------------------------------------------------------------------------
+    38                                  
+    39                                      ;Almacenar los argumentos (numero de desplazamientos y el texto a cifrar).
+    40                                      ;--------------------------------------------------------------------------
     41                                  
-    42 00000023 48BF-                       mov rdi, mensaje
-    42 00000025 [1E00000000000000] 
-    43 0000002D B800000000                  mov rax, 0
-    44 00000032 488B3425[08000000]          mov rsi, [nDesplazamientos]
-    45 0000003A E8(00000000)                call printf
-    46                                      
-    47 0000003F 4889EC                      mov rsp, rbp
-    48 00000042 5D                          pop rbp
-    49 00000043 C3                      ret
+    42 0000000A 4831C0                      xor rax,rax                         ;Limpiamos rax.
+    43 0000000D 4831D2                      xor rdx, rdx                        ;Limpiamos rdx.
+    44 00000010 48893C25[00000000]          mov [argc], rdi                     ;Guardamos el numero de argumentos.
+    45 00000018 488B4608                    mov rax, [rsi+8]                    ;Direccion de memoria de argv[1] en r8.
+    46 0000001C 488B10                      mov rdx, [rax]                      ;Desreferencia *argv[1].
+    47 0000001F 80EA30                      sub dl, '0'                         ;Convertimos de string a int.
+    48 00000022 881425[08000000]            mov [nDesplazamientos], byte dl     ;Guardamos el numero de desplazamientos.
+    49                                      ;mov r8, [rsi+16]
+    50                                      ;mov [mensaje], r8
+    51                                  
+    52 00000029 48BF-                       mov rdi, formatoRotaciones          ;Formato de la cadena.
+    52 0000002B [0000000000000000] 
+    53 00000033 B800000000                  mov rax, 0                          ;No se usaron registros de punto flotante
+    54 00000038 488B3425[08000000]          mov rsi, [nDesplazamientos]         ;Numero de desplazamientos en formato int
+    55 00000040 E8(00000000)                call printf                         ;Se llama la funcion externa 'printf.'
+    56                                  
+    57                                      ;mov rdi, formatoTexto               ;Formato del texto plano.
+    58                                      ;mov rax, 0                          ;No se usaron registros de punto flotante
+    59                                      ;mov rsi, [mensaje]
+    60                                      ;call printf
+    61                                  
+    62 00000045 4889EC                      mov rsp, rbp
+    63 00000048 5D                          pop rbp
+    64 00000049 C3                          ret
+    65                                  
+    66                                      ;--------------------------------------------------------------------------
+    67                                  exit_error:                             ;Salida con error.
+    68 0000004A B801000000                  mov rax, 1
+    69 0000004F BF02000000                  mov rdi, STDERR_FILENO              ;Llamada de systema (write), que escribe al
+    70 00000054 48BE-                       mov rsi, fewArgumentsError          ;descriptor de archivos stderr.
+    70 00000056 [4500000000000000] 
+    71 0000005E BA1B000000                  mov rdx, fewArgumentsErrorLen
+    72 00000063 0F05                        syscall                             ;Se imprime mensaje de error.
+    73                                  
+    74 00000065 B83C000000                  mov rax, 60                         ;Se sale del programa de manera insatisfactoria
+    75 0000006A 48C7C7FFFFFFFF              mov rdi,-1                          ;con valor de retorno de -1.
+    76 00000071 0F05                        syscall
