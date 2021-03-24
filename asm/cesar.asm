@@ -26,12 +26,13 @@ section .data
 
     strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
     nombreAplicacion db KYEL,`\t\tCifrado de Cesar!\n`,0xA,0x0
-    formatoRotaciones db KCYN,`El numero de desplazamientos es %d.`,0xA,0x0
-    formatoTexto db `El mensaje a encriptar es: %s.`,0xA,0x0
+    formatoRotaciones db KCYN,`El numero de desplazamientos es %d.\n`,0xA,0x0
+    formatoTexto db KWHT,`El mensaje a encriptar es: `, KYEL, `%s.`,0xA,0x0
     fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
     fewArgumentsErrorLen equ $-fewArgumentsError
     STDOUT_FILENO equ 0x01
     STDERR_FILENO equ 0x02
+    
 section .bss
     argc resq 1
     nDesplazamientos resq 1
