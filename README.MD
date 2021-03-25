@@ -1,2 +1,2 @@
-## Algoritmos de Enbcriptacion.
+## Algoritmos de Encriptacion.
 ### Carlos Sebastian Madrigal Rodriguez.
