@@ -1,12 +1,20 @@
 ## Algoritmo de cifrado de Cesar. 
 ### Carlos Sebastian Madrigal Rodriguez.
 
-### Para Compilacion: 
-make    (si es que se tiene make instalado)
+## Compilacion: 
 
-### Sin make:
+### Make:
+```bash
+make
+```
+
+### Usando gcc:
+```bash
 gcc -o cesar cesar.c
+```
 
 ### Ejemplos de ejecucion: 
+```bash
 ./cesar [numero de rotaciones] --crypt [Texto a encriptar]
-./cesar [numero de rotaciones] --decrypt [Texto a desencriptar] 
+./cesar [numero de rotaciones] --decrypt [Texto a desencriptar]
+```
