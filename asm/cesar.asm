@@ -28,7 +28,9 @@ section .data
     nombreAplicacion db KYEL,`\t\tCifrado de Cesar!\n`,0xA,0x0
     formatoRotaciones db KCYN,`El numero de desplazamientos es %d.\n`,0xA,0x0
     formatoTextoCrypt db KWHT,`El mensaje a encriptar es: `, KYEL, `%s`,0xA,0x0
-    formatoTextoDecrypt db KWHT,`El mensaje encriptado es: `, KYEL, `%s`,0xA,0x0
+    formatoTextoCrypt2 db KWHT,`El mensaje encriptado es: `, KYEL, `%s`,0xA,0x0
+    formatoTextoDecrypt db KWHT,`El mensaje a desencriptar es: `, KYEL, `%s`,0xA,0x0
+    formatoTextoDecrypt2 db KWHT,`El mensaje desencriptado es: `, KYEL, `%s`,0xA,0x0
     fewArgumentsError db `Error en los argumentos!.`,0xA,0x0
     fewArgumentsErrorLen equ $-fewArgumentsError
     STDOUT_FILENO equ 0x01
@@ -103,11 +105,18 @@ main:
     cmp [rcx], rax
     je jmp_crypt
 
-    jmp exit_error
+    mov rax, "--decrypt"
+    cmp [rcx], rax
+    je jmp_decrypt
 
+    jmp exit_error
 
 jmp_crypt:
     call encriptar
+    jmp exito
+
+jmp_decrypt:
+    call desencriptar
     jmp exito
 
     ;--------------------------------------------------------------------------    
@@ -167,12 +176,29 @@ desencriptar:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 
+    push rdi                            ;Guardar el valor del registro rdi.
+    push rax                            ;Guardar el valor del registro rax.
+    push rsi                            ;Guardar el valor del registro rsi.
+    sub rsp, 8                          ;Alinear la pila.
+
+    mov rdi, formatoTextoDecrypt          ;Formato del texto plano.
+    mov rax, 0                          ;No se usaron registros de punto flotante
+    mov rsi, [mensaje]
+    call printf
+
+    add rsp, 8                          ;Re-establecer la pila.
+    pop rsi                             ;Re-establecer el registo rsi.
+    pop rax                             ;Re-establecer el registo rax.
+    pop rdi                             ;Re-establecer el registo rdi.
+
     mov rsp, rbp
     pop rbp
     ret
 
     ;--------------------------------------------------------------------------
 
+    ;Salida en caso de que haya un error.
+    ;--------------------------------------------------------------------------
 
 exit_error:                             ;Salida con error.
     mov rax, 1
@@ -201,3 +227,5 @@ exit_error:                             ;Salida con error.
     mov rax, 60                         ;Se sale del programa de manera insatisfactoria
     mov rdi,-1                          ;con valor de retorno de -1.
     syscall
+    
+    ;--------------------------------------------------------------------------
