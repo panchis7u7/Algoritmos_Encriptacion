@@ -39,14 +39,17 @@ SHA512::SHA512(){
 SHA512::~SHA512(){
 }
 
-const char* SHA512::hash(const char* input){
+char* SHA512::hash(const char* input){
 	size_t nBuffer; //amt of message blocks
 	uint64** buffer; //message blocks of size 1024bits wtih 16 64bit words
 	uint64* h = new uint64[8];
 	buffer = preprocess((unsigned char*)input, nBuffer);
 	process(buffer, nBuffer, h);
 	freeBuffer(buffer, nBuffer);
-	return digest(h);
+	std::string msg = digest(h);
+	char* shaMsg = (char*)malloc(sizeof(char)*msg.length());
+	strncpy(shaMsg, msg.c_str(), msg.length());
+	return shaMsg;
 }
 
 uint64** SHA512::preprocess(const unsigned char* input, size_t &nBuffer){
@@ -124,14 +127,13 @@ void SHA512::appendLen(uint64 mLen, uint64 mp, uint64& lo, uint64& hi){
 	hi = prod>>64;
 }
 
-const char* SHA512::digest(uint64* h){
+std::string SHA512::digest(uint64* h){
 	std::stringstream ss;
 	for(size_t i=0; i<8; i++){
 		ss << std::hex << h[i];
 	}
 	delete[] h;
-	return ss.str().c_str();
-
+	return ss.str();
 }
 
 void SHA512::freeBuffer(uint64** buffer, size_t nBuffer){

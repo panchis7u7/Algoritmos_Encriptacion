@@ -1,5 +1,5 @@
-extern _ZN6SHA5124hashEPKc
-extern printf
+extern _ZN6SHA5124hashEPKc                      ;Funcion para hashear.
+extern printf                                   ;Funcion para imprimir.
 section .data
     mensaje db "Hola como estas",0xA,0x0
     formato db "%s",0xA,0x0
@@ -14,23 +14,26 @@ global start
 start: 
     push rbp
     mov rbp, rsp
-    sub rsp, 8
+    sub rsp, 16
 
     xor r8, r8
-    ;mov r8, [rsi+8] 
-    mov [mensajeTextoPlano], rdi
+    mov [mensajeTextoPlano], rsi
 
-    mov rdi, [mensajeTextoPlano]
+    mov rsi, [mensajeTextoPlano]
     call _ZN6SHA5124hashEPKc
 
-    mov [sha], rax
+    mov [sha], rax 
+
+    add rsp, 16
+
+    sub rsp, 16
 
     mov rdi, formato                       ;Imprimir el borde punteado.
     mov rax, 0
     mov rsi, [sha]
-    call printf 
+    call printf
 
-    add rsp, 8
+    add rsp, 16
 
     ;mov rax, r8
     ;mov rax, 1

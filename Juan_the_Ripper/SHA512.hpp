@@ -63,11 +63,11 @@ private:
 	uint64** preprocess(const unsigned char* input, size_t& nBuffer);
 	void appendLen(uint64 mLen, uint64 mp, uint64& lo, uint64& hi);
 	void process(uint64** buffer, size_t nBuffer, uint64* h);
-	const char* digest(uint64* h);
+	std::string digest(uint64* h);
 	void freeBuffer(uint64** buffer, size_t nBuffer);
 
 public:
-	const char* hash(const char* input);
+	char* hash(const char* input);
 
 	SHA512();
 	~SHA512();
