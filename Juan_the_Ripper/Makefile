@@ -1,15 +1,17 @@
-CC=g++
-CPPFLAGS=-Wall -Wextra -Werror -pedantic-errors -std=c++2a
+CPP=g++
+NASM=nasm
+CPPFLAGS=-Wall -Wextra -Werror -pedantic-errors -std=c++2a -no-pie
+NASMFLAGS=-f elf64 -g -F dwarf
+PROG=juan
 
-OBJS=hashVal.o SHA512.o
+OBJS= hashMain.o SHA512.o main.o
 
-SOURCES:= $(shell find . -name '*.cpp')
+default: $(PROG)
 
-HEADERS:= $(shell find . -name '*.h')
+$(PROG): $(OBJS)
+	$(CPP) $(CPPFLAGS) -g $(OBJS) -o $(PROG)
 
-all: main
-
-main: $(SOURCES) $(HEADERS)
-	$(CC) $(CPPFLAGS) -pthread -g -o $@ $^
-
-SHA512.o: SHA512.cpp SHA512.h
+hashMain.o: hashMain.cpp
+SHA512.o: SHA512.cpp SHA512.hpp
+main.o: main.asm
+	$(NASM) $(NASMFLAGS) main.asm -o main.o

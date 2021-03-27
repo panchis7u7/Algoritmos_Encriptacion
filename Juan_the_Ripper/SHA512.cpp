@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -----------------------------------------------------------------------------*/
 
-#include "SHA512.h"
+#include "SHA512.hpp"
 #include <stdio.h>
 #include <string>
 #include <string.h>
@@ -39,11 +39,11 @@ SHA512::SHA512(){
 SHA512::~SHA512(){
 }
 
-std::string SHA512::hash(const std::string input){
+const char* SHA512::hash(const char* input){
 	size_t nBuffer; //amt of message blocks
 	uint64** buffer; //message blocks of size 1024bits wtih 16 64bit words
 	uint64* h = new uint64[8];
-	buffer = preprocess((unsigned char*)input.c_str(), nBuffer);
+	buffer = preprocess((unsigned char*)input, nBuffer);
 	process(buffer, nBuffer, h);
 	freeBuffer(buffer, nBuffer);
 	return digest(h);
@@ -124,17 +124,15 @@ void SHA512::appendLen(uint64 mLen, uint64 mp, uint64& lo, uint64& hi){
 	hi = prod>>64;
 }
 
-std::string SHA512::digest(uint64* h){
+const char* SHA512::digest(uint64* h){
 	std::stringstream ss;
 	for(size_t i=0; i<8; i++){
 		ss << std::hex << h[i];
 	}
 	delete[] h;
-	return ss.str();
+	return ss.str().c_str();
 
 }
-
-	
 
 void SHA512::freeBuffer(uint64** buffer, size_t nBuffer){
 	for(size_t i=0; i<nBuffer; i++){
