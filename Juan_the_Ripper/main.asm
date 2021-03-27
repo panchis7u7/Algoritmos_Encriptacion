@@ -1,62 +1,41 @@
-extern _ZN6SHA5124hashEPKc                      ;Funcion para hashear.
-extern printf                                   ;Funcion para imprimir.
+extern _ZN6SHA5124hashEPKc              ;Funcion para hashear.
+extern printf                           ;Funcion para imprimir.
 section .data
-    mensaje db "Hola como estas",0xA,0x0
-    formato db "%s",0xA,0x0
-    mensajeLen equ $-mensaje
+    formato db "%s",0xA,0x0             ;Formato simple para hacer debug.
 
 section .bss
-    mensajeTextoPlano resq 1
-    sha resq 1
+    mensajeTextoPlano resq 1            ;Almacen de la contraseña en texto plano.
+    sha resq 1                          ;Almacen de la contraseña cifrada.
 
 section .text
 global start
 start: 
-    push rbp
-    mov rbp, rsp
-    sub rsp, 16
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
 
-    xor r8, r8
-    mov [mensajeTextoPlano], rsi
+    ;Cifrar el texto plano.
+    ;--------------------------------------------------------------------------
 
-    mov rsi, [mensajeTextoPlano]
-    call _ZN6SHA5124hashEPKc
+    mov [mensajeTextoPlano], rsi        ;Guardar el mensaje en texto plano.
+    sub rsp, 16                         ;Espacio de sombra para *this, input.
 
-    mov [sha], rax 
+    mov rsi, [mensajeTextoPlano]        ;Pasar como argumento el mensaje.
+    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
+    mov [sha], rax                      ;Guardar el hash (valor de retorno).
 
-    add rsp, 16
+    add rsp, 16                         ;Reestablecer la pila.
 
-    sub rsp, 16
+    ;--------------------------------------------------------------------------
 
-    mov rdi, formato                       ;Imprimir el borde punteado.
+    sub rsp, 24
+
     mov rax, 0
+    mov rdi, formato                       ;Imprimir el borde punteado.
     mov rsi, [sha]
     call printf
 
-    add rsp, 16
+    add rsp, 24
 
-    ;mov rax, r8
-    ;mov rax, 1
-    ;mov rdi, 1                          ;Llamada de systema (write), que escribe al
-    ;mov rsi, r8                         ;descriptor de archivos stderr.
-    ;mov rdx, 64
-    ;syscall
-
-    push rdi                            ;Guardar el valor del registro rdi.
-    push rax                            ;Guardar el valor del registro rax.
-    push rsi                            ;Guardar el valor del registro rsi.
-    sub rsp, 8                          ;Alinear la pila.
-
-    mov rdi, formato                       ;Imprimir el borde punteado.
-    mov rax, 0
-    mov rsi, [mensajeTextoPlano]
-    call printf
-
-    add rsp, 8                          ;Re-establecer la pila.
-    pop rsi                             ;Re-establecer el registo rsi.
-    pop rax                             ;Re-establecer el registo rax.
-    pop rdi                             ;Re-establecer el registo rdi.
-
-    mov rsp, rbp
-    pop rbp
+    mov rsp, rbp                        ;Reestablecer el apuntador de
+    pop rbp                             ;la pila.
     ret
