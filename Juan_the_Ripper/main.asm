@@ -28,10 +28,11 @@ section .data
     S_IWUSR 	equ 	00200q 	        ;Permiso de escritura para el usuario.
  
     NL	  		equ		0xa					
-    bufferlen  	equ 	64
+    bufferlen  	equ 	255
 
     FD 		 dq 	0	                ;File descriptor
 
+    len db 0
     error_Close 	db "Error al cerrar el archivo!",NL,0
     error_Write 	db "Error al escribir al archivo!",NL,0
     error_Open 		db "Error al abrir archivo!",NL,0
@@ -51,12 +52,16 @@ section .data
     success_Position db "Positioned in file",NL,0
 
     formato db "%s",0xA,0x0             ;Formato simple para hacer debug.
+    formatoInt db "%d",0xA,0x0
     archivoCargado db "Archivo cargado: %s",0xA,0x0
 
 section .bss
     mensajeTextoPlano resq 1            ;Almacen de la contraseña en texto plano.
     sha resq 1                          ;Almacen de la contraseña cifrada.
     diccionario resq 1                  ;Ruta absoluta del diccionario de datos.
+    buffer resq bufferlen               ;Buffer para cada linea del archivo.
+    lineSize resq 1
+    nchar resq 1
 
 section .text
 global start
@@ -86,6 +91,7 @@ start:
     mov rdi, [diccionario]              ;Ruta del archivo.
     mov rsi, O_RDWR                     ;Abrir en modo Lectura/Escritura.
     syscall
+    mov qword [FD], rax                 ;Guardar descriptor de datos.
 
     cmp rax, 0                          ;Checar si hubo un error.
     jl openError 
@@ -98,6 +104,21 @@ start:
     call printf
 
     add rsp, 20h
+
+    ;--------------------------------------------------------------------------
+
+    ;Leer el archivo linea por linea y comparar.
+    ;--------------------------------------------------------------------------
+
+    mov r8, 0
+    call readLine
+    mov r8, [lineSize]
+    call readLine
+    mov r8, [lineSize]
+    call readLine
+
+    mov rdi, [FD]
+    syscall
 
     ;--------------------------------------------------------------------------
 
@@ -119,14 +140,39 @@ start:
 openError:
     mov rdi, error_Open
     call printString 
+    jmp exit_error
+
+positionError:
+    mov rdi, error_Position
+    call printString
+    jmp exit_error
+
+readError:
+    mov rdi, error_Read
+    call printString
+    jmp exit_error
+
+exit_error:
+    mov rsp, rbp
+    pop rbp
+
+    mov rax, 60                         ;Cerrar con error.
+    mov rdi, -1
+    syscall
+    ret
 
     ;--------------------------------------------------------------------------
 
     ;Impresion.
     ;--------------------------------------------------------------------------
+
+
+    ;Funciones.
+    ;--------------------------------------------------------------------------
 global printString
 printString:
-
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
 ; Count characters 
     mov 	r12, rdi
     mov 	rdx, 0 
@@ -144,7 +190,62 @@ strDone:
     mov 	rdi, 1
     syscall
 prtDone:
+    mov rsp, rbp                        ;Reestablecer el apuntador de
+    pop rbp                             ;la pila.
+    ret
 
+global readLine
+readLine:
+    push rbp                            ;Guarda el apuntador de la base de
+    mov rbp, rsp                        ;la pila.
+
+    mov rdi, qword [FD]                 ;Descriptor de datos abierto.
+    mov rsi, qword r8                   ;Offset de 0.
+    mov rdx, 0
+    mov rax, NR_lseek                   ;Syscall lseek.
+    syscall
+
+    cmp rax, 0
+    jl positionError
+    mov qword [nchar], rax
+
+    mov rdi, qword [FD]
+    mov rsi, buffer
+    mov rdx, bufferlen
+    mov rax, NR_read
+    syscall
+
+    cmp rax, 0
+    jl readError
+
+    mov r8 , buffer
+    mov r9, 0
+    mov qword rcx, [lineSize]
+    cmp qword [lineSize], 0
+    cmove rcx, r9
+    mov [lineSize], rcx
+
+loop:
+    inc qword [lineSize]
+    cmp byte [r8], byte 0xA
+    jne increment
+    jmp continue
+increment:
+    add qword r8, 1
+    jmp loop
+continue:
+    mov byte [r8], byte 0
+    sub rsp, 20h
+
+    mov rax, 0
+    mov rdi, formato             ;Imprimir el borde punteado.
+    mov rsi, buffer
+    call printf
+
+    add rsp, 20h
+
+    mov rsp, rbp                        ;Reestablecer el apuntador de
+    pop rbp                             ;la pila.
     ret
 
     ;--------------------------------------------------------------------------
