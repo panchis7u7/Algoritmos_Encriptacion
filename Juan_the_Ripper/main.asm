@@ -60,8 +60,9 @@ section .bss
     sha resq 1                          ;Almacen de la contraseña cifrada.
     diccionario resq 1                  ;Ruta absoluta del diccionario de datos.
     buffer resq bufferlen               ;Buffer para cada linea del archivo.
-    lineSize resq 1
-    nchar resq 1
+    lineSize resq 1                     ;Longitud de cadena de cada linea.
+    nchar resq 1                        ;Longitud leida de read().
+    this resq 1                         ;Apuntador que hace referencia al objeto.
 
 section .text
 global start
@@ -69,18 +70,12 @@ start:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 
-    ;Cifrar el texto plano.
+    ;Guardar datos provenientes desde C++.
     ;--------------------------------------------------------------------------
 
-    mov [mensajeTextoPlano], rsi        ;Guardar el mensaje en texto plano.
-    mov [diccionario], rdx              ;Guardar la ruta del diccionario.
-    sub rsp, 20h                        ;Espacio de sombra para *this, input.
-
-    mov rsi, [mensajeTextoPlano]        ;Pasar como argumento el mensaje.
-    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
-    mov [sha], rax                      ;Guardar el hash (valor de retorno).
-
-    add rsp, 20h                        ;Reestablecer la pila.
+    mov qword [this], rdi               ;Guardar la referencia al objeto.
+    mov qword [mensajeTextoPlano], rsi  ;Guardar el mensaje en texto plano.
+    mov qword [diccionario], rdx        ;Guardar la ruta del diccionario.
 
     ;--------------------------------------------------------------------------
 
@@ -114,26 +109,38 @@ start:
     call readLine
     mov r8, [lineSize]
     call readLine
-    mov r8, [lineSize]
-    call readLine
 
-    mov rdi, [FD]
-    syscall
+    ;--------------------------------------------------------------------------
+
+    ;Cifrar el texto plano.
+    ;--------------------------------------------------------------------------
+
+    sub rsp, 20h                        ;Espacio de sombra para *this, input.
+
+    mov rdi, [this]                     ;Apuntador que hace referencia al objeto.
+    mov rsi, [mensajeTextoPlano]        ;Pasar como argumento el mensaje.
+    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
+    mov qword [sha], rax                ;Guardar el hash (valor de retorno).
+
+    add rsp, 20h                        ;Reestablecer la pila.
 
     ;--------------------------------------------------------------------------
 
     sub rsp, 20h
 
     mov rax, 0
-    mov rdi, formato                       ;Imprimir el borde punteado.
+    mov rdi, formato                    ;Imprimir el borde punteado.
     mov rsi, [sha]
     call printf
 
     add rsp, 20h
 
+    mov rdi, [FD]                       ;Cerrar el descriptor de datos
+    syscall                             ;abierto.
+
     mov rsp, rbp                        ;Reestablecer el apuntador de
     pop rbp                             ;la pila.
-    ret
+    ret                                 ;Regresamos a c++.
 
     ;Errores.
     ;--------------------------------------------------------------------------
@@ -163,37 +170,40 @@ exit_error:
 
     ;--------------------------------------------------------------------------
 
-    ;Impresion.
-    ;--------------------------------------------------------------------------
-
-
     ;Funciones.
     ;--------------------------------------------------------------------------
+
+;Funcion readLine.
+;#############################################################################
 global printString
 printString:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 ; Count characters 
-    mov 	r12, rdi
-    mov 	rdx, 0 
+    mov r12, rdi
+    mov rdx, 0 
 strLoop:
-    cmp 	byte [r12], 0
-    je 		strDone
-    inc 	rdx                 ;length in rdx
-    inc 	r12
-    jmp 	strLoop
+    cmp byte [r12], 0
+    je strDone
+    inc rdx                             ;Longitud en rdx.
+    inc r12
+    jmp strLoop
 strDone:
-    cmp 	rdx, 0              ; no string (0 length)
-    je 		prtDone
-    mov 	rsi,rdi
-    mov 	rax, 1 
-    mov 	rdi, 1
+    cmp rdx, 0                          ;No string (0 length)
+    je prtDone
+    mov rsi,rdi
+    mov rax, 1 
+    mov rdi, 1
     syscall
 prtDone:
     mov rsp, rbp                        ;Reestablecer el apuntador de
     pop rbp                             ;la pila.
     ret
 
+;#############################################################################
+
+;Funcion readLine.
+;#############################################################################
 global readLine
 readLine:
     push rbp                            ;Guarda el apuntador de la base de
@@ -205,25 +215,25 @@ readLine:
     mov rax, NR_lseek                   ;Syscall lseek.
     syscall
 
-    cmp rax, 0
-    jl positionError
-    mov qword [nchar], rax
+    cmp rax, 0                          ;Checar si hubo errores.
+    jl positionError                    ;Si hubo, brinca.
+    mov qword [nchar], rax              ;Guarda el numero de bits leidos.
 
-    mov rdi, qword [FD]
-    mov rsi, buffer
-    mov rdx, bufferlen
-    mov rax, NR_read
+    mov rdi, qword [FD]                 ;Lee archivo a partir del offset.
+    mov rsi, buffer                     ;Buffer en donde se almacenara el
+    mov rdx, bufferlen                  ;contenido.
+    mov rax, NR_read                    ;Syscall read.
     syscall
 
-    cmp rax, 0
+    cmp rax, 0                          ;Checar si hay errores.
     jl readError
 
-    mov r8 , buffer
-    mov r9, 0
+    mov r8 , buffer                     ;Generar otro apuntador para no 
+    mov r9, 0                           ;perder la raiz.
     mov qword rcx, [lineSize]
-    cmp qword [lineSize], 0
-    cmove rcx, r9
-    mov [lineSize], rcx
+    cmp qword [lineSize], 0             ;Es la primera linea del archivo?
+    cmove rcx, r9                       ;Si es, mueve un 0.
+    mov [lineSize], rcx                 ;Si no, deja el valor donde quedo.
 
 loop:
     inc qword [lineSize]
@@ -238,7 +248,7 @@ continue:
     sub rsp, 20h
 
     mov rax, 0
-    mov rdi, formato             ;Imprimir el borde punteado.
+    mov rdi, formato                    ;Imprimir el borde punteado.
     mov rsi, buffer
     call printf
 
@@ -248,4 +258,5 @@ continue:
     pop rbp                             ;la pila.
     ret
 
+    ;#############################################################################
     ;--------------------------------------------------------------------------
