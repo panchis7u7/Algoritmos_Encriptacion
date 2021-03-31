@@ -53,7 +53,21 @@ section .data
 
     formato db "%s",0xA,0x0             ;Formato simple para hacer debug.
     formatoInt db "%d",0xA,0x0
-    archivoCargado db "Archivo cargado: %s",0xA,0x0
+
+    %define KNRM  `\x1B[0m`
+    %define KRED  `\x1B[31m`
+    %define KGRN  `\x1B[32m`
+    %define KYEL  `\x1B[33m`
+    %define KBLU  `\x1B[34m`
+    %define KMAG  `\x1B[35m`
+    %define KCYN  `\x1B[36m`
+    %define KWHT  `\x1B[37m`
+
+    strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
+    nombreAplicacion db KYEL,`\t\tJuan the Ripper\n`,0xA,0x0
+    archivoCargado db KWHT, `Diccionario cargado:`, KYEL, ` %s`,0xA,0x0
+    algoritmo db KWHT, `Algoritmo SHA-512 para todos los hashes.`,0xA,0x0
+    msgAbortar db `Presione`, KRED, ` CTRL-C `, KWHT, `para salir del programa.`, KYEL, 0xA, `Descifrando...`,0xA,0x0
 
 section .bss
     mensajeTextoPlano resq 1            ;Almacen de la contraseña en texto plano.
@@ -79,6 +93,21 @@ start:
 
     ;--------------------------------------------------------------------------
 
+    ;Imprimir borde y titulo de la aplicacion.
+    ;--------------------------------------------------------------------------
+
+    sub rsp, 20h
+    mov rax, 0
+    mov rdi, strLimite
+    call printf
+
+    mov rax, 0
+    mov rdi, nombreAplicacion
+    call printf
+    add rsp, 20h
+
+    ;--------------------------------------------------------------------------
+
     ;Abrir el archivo.
     ;--------------------------------------------------------------------------
 
@@ -96,6 +125,14 @@ start:
     mov rax, 0
     mov rdi, archivoCargado             ;Imprimir el borde punteado.
     mov rsi, [diccionario]
+    call printf
+
+    mov rax, 0 
+    mov rdi, algoritmo                  ;Imprimir el algoritmo detectado.
+    call printf
+
+    mov rax, 0
+    mov rdi, msgAbortar                 ;Imprimir mensajes de estado.
     call printf
 
     add rsp, 20h
@@ -137,6 +174,17 @@ start:
 
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
     syscall                             ;abierto.
+
+    ;Imprimir borde final.
+    ;--------------------------------------------------------------------------
+
+    sub rsp, 20h
+    mov rax, 0
+    mov rdi, strLimite
+    call printf
+    add rsp, 20h
+
+    ;--------------------------------------------------------------------------
 
     mov rsp, rbp                        ;Reestablecer el apuntador de
     pop rbp                             ;la pila.
