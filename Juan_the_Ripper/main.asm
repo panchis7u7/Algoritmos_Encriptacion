@@ -144,18 +144,18 @@ start:
     ;Leer el archivo linea por linea y comparar.
     ;--------------------------------------------------------------------------
 
-    mov r8, 0
-    mov [lineSize], r8
+    mov r8, 0                           ;Inicializar registros.
+    mov [lineSize], r8                  ;Espacio de cada linea en 0.
 readLoop:
     mov r8, [lineSize]
-    call readLine
-
-    cmp rax, 0
+    call readLine                       ;Obtener texto de la linea 'n' del
+                                        ;archivo de texto.
+    cmp rax, 0                          ;Checar si retorno EOF (fin de archivo).
     je noEncontrado
 
     mov r9, rax
 
-    mov rcx, 0
+    mov rcx, 0                          ;Comparar las cadenas.
     mov rsi, [mensajeTextoPlano]
     mov rdi, rax 
     mov ecx, [nchar]
