@@ -68,6 +68,8 @@ section .data
     archivoCargado db KWHT, `Diccionario cargado:`, KYEL, ` %s`,0xA,0x0
     algoritmo db KWHT, `Algoritmo SHA-512 para todos los hashes.`,0xA,0x0
     msgAbortar db `Presione`, KRED, ` CTRL-C `, KWHT, `para salir del programa.`, KYEL, 0xA, `Descifrando...`,0xA,0x0
+    hashEncontrado db KWHT,`Hash Encontrado para %s => (`, KYEL, `%s`, KWHT, `)`,0xA,0x0
+    hashNoEncontrado db KRED, `Hash no encontardo en el diccionario!`,0xA,0x0
 
 section .bss
     mensajeTextoPlano resq 1            ;Almacen de la contraseña en texto plano.
@@ -143,9 +145,44 @@ start:
     ;--------------------------------------------------------------------------
 
     mov r8, 0
-    call readLine
+    mov [lineSize], r8
+readLoop:
     mov r8, [lineSize]
     call readLine
+
+    cmp rax, 0
+    je noEncontrado
+
+    mov r9, rax
+
+    mov rcx, 0
+    mov rsi, [mensajeTextoPlano]
+    mov rdi, rax 
+    mov ecx, [nchar]
+    repe cmpsb
+    jne readLoop
+    jmp encontrado 
+
+noEncontrado:
+    sub rsp, 20h
+
+    mov rdi, hashNoEncontrado             ;Imprimir el borde punteado.
+    mov rax, 0
+    call printf
+
+    add rsp, 20h
+    jmp Salida
+encontrado: 
+
+    sub rsp, 20h
+
+    mov rdi, hashEncontrado             ;Imprimir el borde punteado.
+    mov rsi, [mensajeTextoPlano]
+    mov rdx, r9
+    mov rax, 0
+    call printf
+
+    add rsp, 20h
 
     ;--------------------------------------------------------------------------
 
@@ -178,6 +215,7 @@ start:
     ;Imprimir borde final.
     ;--------------------------------------------------------------------------
 
+Salida:
     sub rsp, 20h
     mov rax, 0
     mov rdi, strLimite
@@ -257,6 +295,9 @@ readLine:
     push rbp                            ;Guarda el apuntador de la base de
     mov rbp, rsp                        ;la pila.
 
+    mov rax, 0
+    mov [nchar], rax
+
     mov rdi, qword [FD]                 ;Descriptor de datos abierto.
     mov rsi, qword r8                   ;Offset de 0.
     mov rdx, 0
@@ -265,7 +306,6 @@ readLine:
 
     cmp rax, 0                          ;Checar si hubo errores.
     jl positionError                    ;Si hubo, brinca.
-    mov qword [nchar], rax              ;Guarda el numero de bits leidos.
 
     mov rdi, qword [FD]                 ;Lee archivo a partir del offset.
     mov rsi, buffer                     ;Buffer en donde se almacenara el
@@ -274,6 +314,7 @@ readLine:
     syscall
 
     cmp rax, 0                          ;Checar si hay errores.
+    je endOfFile
     jl readError
 
     mov r8 , buffer                     ;Generar otro apuntador para no 
@@ -285,6 +326,7 @@ readLine:
 
 loop:
     inc qword [lineSize]
+    inc qword [nchar]
     cmp byte [r8], byte 0xA
     jne increment
     jmp continue
@@ -301,6 +343,15 @@ continue:
     call printf
 
     add rsp, 20h
+    
+    mov rax, buffer
+
+    mov rsp, rbp                        ;Reestablecer el apuntador de
+    pop rbp                             ;la pila.
+    ret
+
+endOfFile:
+    mov rax, 0
 
     mov rsp, rbp                        ;Reestablecer el apuntador de
     pop rbp                             ;la pila.
