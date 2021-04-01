@@ -66,17 +66,21 @@ section .data
     strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
     nombreAplicacion db KYEL,`\t\tJuan the Ripper\n`,0xA,0x0
     archivoCargado db KWHT, `Diccionario cargado:`, KYEL, ` %s`,0xA,0x0
+    hashCargado db KWHT, `Hash cargado:`, KYEL, ` %s`,0xA,0x0
     algoritmo db KWHT, `Algoritmo SHA-512 para todos los hashes.`,0xA,0x0
     msgAbortar db `Presione`, KRED, ` CTRL-C `, KWHT, `para salir del programa.`, KYEL, 0xA, `Descifrando...`,0xA,0x0
     hashEncontrado db KWHT,`Hash Encontrado para %s => (`, KYEL, `%s`, KWHT, `)`,0xA,0x0
     hashNoEncontrado db KRED, `Hash no encontardo en el diccionario!`,0xA,0x0
 
 section .bss
-    mensajeTextoPlano resq 1            ;Almacen de la contraseña en texto plano.
+    buffer resq bufferlen               ;Buffer para cada linea del archivo.
+    directorioHash resq 1               ;Almacen de la contraseña en texto plano.
+    hash resq 1                         ;Hash.
+    hash2 resq 1
     sha resq 1                          ;Almacen de la contraseña cifrada.
     diccionario resq 1                  ;Ruta absoluta del diccionario de datos.
-    buffer resq bufferlen               ;Buffer para cada linea del archivo.
     lineSize resq 1                     ;Longitud de cadena de cada linea.
+    hashLen resq 1                      ;Longitud del hash.
     nchar resq 1                        ;Longitud leida de read().
     this resq 1                         ;Apuntador que hace referencia al objeto.
 
@@ -90,7 +94,7 @@ start:
     ;--------------------------------------------------------------------------
 
     mov qword [this], rdi               ;Guardar la referencia al objeto.
-    mov qword [mensajeTextoPlano], rsi  ;Guardar el mensaje en texto plano.
+    mov qword [directorioHash], rsi     ;Guardar el directorio del hash.
     mov qword [diccionario], rdx        ;Guardar la ruta del diccionario.
 
     ;--------------------------------------------------------------------------
@@ -113,6 +117,35 @@ start:
     ;Abrir el archivo.
     ;--------------------------------------------------------------------------
 
+    ;Archivo que contiene el hash.
+    mov rax, NR_open                    ;Syscall Open -> 2.
+    mov rdi, [directorioHash]           ;Ruta del archivo.
+    mov rsi, O_RDWR                     
+    syscall
+    mov qword [FD], rax
+
+    cmp rax, 0
+    jl openError
+
+    mov r8, 0
+    mov [lineSize], r8
+    call readLine
+    mov [hash], rax                     ;Guardamos el hash.
+
+    mov r10, [nchar]
+    mov [hashLen], r10
+
+    lea rdi, [hash2]
+    lea rsi, [hash]
+    mov rcx, [hashLen]
+    cld
+    rep movsb
+
+    mov rax, 3
+    mov rdi, [FD]                       ;Cerrar el descriptor de datos
+    syscall                             ;abierto.
+
+    ;Archivo de diccionario de datos.
     mov rax, NR_open                    ;Syscall Open -> 2.
     mov rdi, [diccionario]              ;Ruta del archivo.
     mov rsi, O_RDWR                     ;Abrir en modo Lectura/Escritura.
@@ -125,8 +158,13 @@ start:
     sub rsp, 20h
 
     mov rax, 0
-    mov rdi, archivoCargado             ;Imprimir el borde punteado.
+    mov rdi, archivoCargado             ;Imprimir la carga del diccionario.
     mov rsi, [diccionario]
+    call printf
+
+    mov rax, 0
+    mov rdi, hashCargado                ;Imprimir la carga del hash.
+    mov rsi, [directorioHash]
     call printf
 
     mov rax, 0 
@@ -145,7 +183,15 @@ start:
     ;--------------------------------------------------------------------------
 
     mov r8, 0                           ;Inicializar registros.
-    mov [lineSize], r8                  ;Espacio de cada linea en 0.
+    mov [lineSize], r8                  ;Espacio de cada linea en 0.   
+    sub rsp, 20h
+
+    mov rax, 0
+    mov rdi, formato           ;Imprimir la carga del diccionario.
+    mov rsi, [hash]
+    call printf
+
+    add rsp, 20h         
 readLoop:
     mov r8, [lineSize]
     call readLine                       ;Obtener texto de la linea 'n' del
@@ -155,10 +201,24 @@ readLoop:
 
     mov r9, rax
 
+    ;Cifrar el texto plano.
+    ;--------------------------------------------------------------------------
+
+    sub rsp, 20h                        ;Espacio de sombra para *this, input.
+
+    mov rdi, [this]                     ;Apuntador que hace referencia al objeto.
+    mov rsi, rax                         ;Pasar como argumento el mensaje.
+    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
+    mov qword [sha], rax                ;Guardar el hash (valor de retorno).
+
+    add rsp, 20h                        ;Reestablecer la pila.
+
+    ;--------------------------------------------------------------------------
+
     mov rcx, 0                          ;Comparar las cadenas.
-    mov rsi, [mensajeTextoPlano]
-    mov rdi, rax 
-    mov ecx, [nchar]
+    mov rsi, rax
+    mov rdi, rax
+    mov rcx, [hashLen]
     repe cmpsb
     jne readLoop
     jmp encontrado 
@@ -177,26 +237,12 @@ encontrado:
     sub rsp, 20h
 
     mov rdi, hashEncontrado             ;Imprimir el borde punteado.
-    mov rsi, [mensajeTextoPlano]
-    mov rdx, r9
+    mov rsi, [directorioHash]
+    mov rdx, [hash]
     mov rax, 0
     call printf
 
     add rsp, 20h
-
-    ;--------------------------------------------------------------------------
-
-    ;Cifrar el texto plano.
-    ;--------------------------------------------------------------------------
-
-    sub rsp, 20h                        ;Espacio de sombra para *this, input.
-
-    mov rdi, [this]                     ;Apuntador que hace referencia al objeto.
-    mov rsi, [mensajeTextoPlano]        ;Pasar como argumento el mensaje.
-    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
-    mov qword [sha], rax                ;Guardar el hash (valor de retorno).
-
-    add rsp, 20h                        ;Reestablecer la pila.
 
     ;--------------------------------------------------------------------------
 
@@ -209,6 +255,7 @@ encontrado:
 
     add rsp, 20h
 
+    mov rax, 3
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
     syscall                             ;abierto.
 
@@ -221,6 +268,10 @@ Salida:
     mov rdi, strLimite
     call printf
     add rsp, 20h
+
+    mov rax, 3
+    mov rdi, [FD]
+    syscall
 
     ;--------------------------------------------------------------------------
 
