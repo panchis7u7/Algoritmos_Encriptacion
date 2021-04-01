@@ -1,6 +1,13 @@
 extern _ZN6SHA5124hashEPKc              ;Funcion para hashear.
 extern printf                           ;Funcion para imprimir.
 section .data
+	MAP_FAILED  equ -1
+	PROT_READ   equ 0x1
+	PROT_WRITE  equ 0x2
+	PROT_EXEC   equ 0x4
+	PROT_NONE   equ 0x0
+	MAP_PRIVATE equ 0x2
+	MAP_ANONYMOUS equ 0x20
     CREATE 		equ 	1               ;Expresiones usadas para condicionales.
 	OVERWRITE 	equ 	1
 	APPEND 		equ 	1
@@ -130,16 +137,31 @@ start:
     mov r8, 0
     mov [lineSize], r8
     call readLine
-    mov [hash], rax                     ;Guardamos el hash.
+    mov [hash], rax                         ;Guardamos el hash.
 
     mov r10, [nchar]
     mov [hashLen], r10
 
-    lea rdi, [hash2]
-    lea rsi, [hash]
-    mov rcx, [hashLen]
+    mov rax, 9								;mmap syscall no.
+	mov rdi, 0								;hint 
+	mov rsi, [hashLen]							;page size
+	mov rdx, PROT_READ | PROT_WRITE			;Read and write memory
+	mov r10, MAP_PRIVATE | MAP_ANONYMOUS	;no shared pages
+	mov r8, 0 								;no file descriptor
+	mov r9, 0								;no offset
+	syscall
+
+    cmp rax, MAP_FAILED
+    je positionError
+
+    mov rdx, rax                            ;Copy hash.
     cld
+    mov rsi, [hash]
+    mov rdi, rdx
+    mov rcx, [hashLen]
     rep movsb
+
+    mov [hash], rdx
 
     mov rax, 3
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
@@ -183,15 +205,7 @@ start:
     ;--------------------------------------------------------------------------
 
     mov r8, 0                           ;Inicializar registros.
-    mov [lineSize], r8                  ;Espacio de cada linea en 0.   
-    sub rsp, 20h
-
-    mov rax, 0
-    mov rdi, formato           ;Imprimir la carga del diccionario.
-    mov rsi, [hash]
-    call printf
-
-    add rsp, 20h         
+    mov [lineSize], r8                  ;Espacio de cada linea en 0.      
 readLoop:
     mov r8, [lineSize]
     call readLine                       ;Obtener texto de la linea 'n' del
@@ -217,7 +231,7 @@ readLoop:
 
     mov rcx, 0                          ;Comparar las cadenas.
     mov rsi, rax
-    mov rdi, rax
+    mov rdi, [hash]
     mov rcx, [hashLen]
     repe cmpsb
     jne readLoop
@@ -238,7 +252,7 @@ encontrado:
 
     mov rdi, hashEncontrado             ;Imprimir el borde punteado.
     mov rsi, [directorioHash]
-    mov rdx, [hash]
+    mov rdx, buffer
     mov rax, 0
     call printf
 
@@ -246,14 +260,14 @@ encontrado:
 
     ;--------------------------------------------------------------------------
 
-    sub rsp, 20h
+    ;sub rsp, 20h
 
-    mov rax, 0
-    mov rdi, formato                    ;Imprimir el borde punteado.
-    mov rsi, [sha]
-    call printf
+    ;mov rax, 0
+    ;mov rdi, formato                   ;Imprimir el hash.
+    ;mov rsi, [sha]
+    ;call printf
 
-    add rsp, 20h
+    ;add rsp, 20h
 
     mov rax, 3
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
@@ -386,14 +400,14 @@ increment:
     jmp loop
 continue:
     mov byte [r8], byte 0
-    sub rsp, 20h
+    ;sub rsp, 20h
 
-    mov rax, 0
-    mov rdi, formato                    ;Imprimir el borde punteado.
-    mov rsi, buffer
-    call printf
+    ;mov rax, 0
+    ;mov rdi, formato                   ;Imprimir la cadena.
+    ;mov rsi, buffer
+    ;call printf
 
-    add rsp, 20h
+    ;add rsp, 20h
     
     mov rax, buffer
 
