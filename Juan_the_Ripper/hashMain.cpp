@@ -6,6 +6,10 @@
 //Algoritmo de SHA512, main in c++.
 extern "C" void start(SHA512& sha512, char* msg, char* dictionary);
 
+int getSize(char* msg){
+	return strlen(msg);
+} 
+
 int main(int argc, char *argv[]){
 	(void)argc;
 	SHA512 sha512;

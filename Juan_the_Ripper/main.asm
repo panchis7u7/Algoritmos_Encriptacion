@@ -1,13 +1,15 @@
 extern _ZN6SHA5124hashEPKc              ;Funcion para hashear.
+extern _Z7getSizePc                     ;funcion para obtener el tamano.
 extern printf                           ;Funcion para imprimir.
 section .data
-	MAP_FAILED  equ -1
-	PROT_READ   equ 0x1
-	PROT_WRITE  equ 0x2
-	PROT_EXEC   equ 0x4
-	PROT_NONE   equ 0x0
-	MAP_PRIVATE equ 0x2
-	MAP_ANONYMOUS equ 0x20
+	MAP_FAILED      equ -1
+	PROT_READ       equ 0x1
+	PROT_WRITE      equ 0x2
+	PROT_EXEC       equ 0x4
+	PROT_NONE       equ 0x0
+	MAP_PRIVATE     equ 0x2
+	MAP_ANONYMOUS   equ 0x20
+
     CREATE 		equ 	1               ;Expresiones usadas para condicionales.
 	OVERWRITE 	equ 	1
 	APPEND 		equ 	1
@@ -43,20 +45,9 @@ section .data
     error_Close 	db "Error al cerrar el archivo!",NL,0
     error_Write 	db "Error al escribir al archivo!",NL,0
     error_Open 		db "Error al abrir archivo!",NL,0
-    error_Append 	db "error appending to file",NL,0
-    error_Delete 	db "error deleting file",NL,0
     error_Read 		db "Error al leer el archivo!",NL,0
-    error_Print 	db "error printing string",NL,0
-    error_Position 	db "error positioning in file",NL,0
-        
-    success_Create 	db "File created and opened",NL,0
-    success_Close 	db "File closed",NL,NL,0
-    success_Write 	db "Written to file",NL,0
-    success_Open 	db "File opened for reading/(over)writing/updating",NL,0
-    success_Append 	db "File opened for appending",NL,0
-    success_Delete 	db "File deleted",NL,0
-    success_Read 	db "Reading file",NL,0
-    success_Position db "Positioned in file",NL,0
+    error_Print 	db "Error al imprimir cadena!",NL,0
+    error_Position 	db "Error al posicionar archivo!",NL,0
 
     formato db "%s",0xA,0x0             ;Formato simple para hacer debug.
     formatoInt db "%d",0xA,0x0
@@ -78,6 +69,8 @@ section .data
     msgAbortar db `Presione`, KRED, ` CTRL-C `, KWHT, `para salir del programa.`, KYEL, 0xA, `Descifrando...`,0xA,0x0
     hashEncontrado db KWHT,`Hash Encontrado para %s => (`, KYEL, `%s`, KWHT, `)`,0xA,0x0
     hashNoEncontrado db KRED, `Hash no encontardo en el diccionario!`,0xA,0x0
+    tamanoHashPrincipal db KWHT, `Tamano hash principal: `, KYEL,`%d`,0xA,0x0
+    tamanoHashSecundario db KWHT, `Tamano hash secundario: `, KYEL,`%d`,0xA,0x0
 
 section .bss
     buffer resq bufferlen               ;Buffer para cada linea del archivo.
@@ -140,12 +133,22 @@ start:
     mov [hash], rax                         ;Guardamos el hash.
 
     mov r10, [nchar]
-    mov [hashLen], r10
+    mov [hashLen], r10                      ;Guardamos la longitud del hash.
+
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ;sub rsp, 20h
+
+    ;mov rdi, tamanoHashPrincipal
+    ;mov rsi, [hashLen]
+    ;call printf
+
+    ;add rsp, 20h
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     mov rax, 9								;mmap syscall no.
-	mov rdi, 0								;hint 
-	mov rsi, [hashLen]							;page size
-	mov rdx, PROT_READ | PROT_WRITE			;Read and write memory
+	mov rdi, 0								;hint. 
+	mov rsi, [hashLen]						;tamano de la pagina.
+	mov rdx, PROT_READ | PROT_WRITE			;Memoria de ;
 	mov r10, MAP_PRIVATE | MAP_ANONYMOUS	;no shared pages
 	mov r8, 0 								;no file descriptor
 	mov r9, 0								;no offset
@@ -154,14 +157,14 @@ start:
     cmp rax, MAP_FAILED
     je positionError
 
-    mov rdx, rax                            ;Copy hash.
+    mov rdx, rax                        ;Copy hash.
     cld
     mov rsi, [hash]
     mov rdi, rdx
     mov rcx, [hashLen]
     rep movsb
 
-    mov [hash], rdx
+    mov [hash], rdx                     ;Se guarda la copia.
 
     mov rax, 3
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
@@ -211,7 +214,7 @@ readLoop:
     call readLine                       ;Obtener texto de la linea 'n' del
                                         ;archivo de texto.
     cmp rax, 0                          ;Checar si retorno EOF (fin de archivo).
-    je noEncontrado
+    jle noEncontrado
 
     mov r9, rax
 
@@ -227,10 +230,39 @@ readLoop:
 
     add rsp, 20h                        ;Reestablecer la pila.
 
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    ;push rax
+
+    ;mov rdi, [sha]
+    ;call _Z7getSizePc
+
+    ;sub rsp, 20h
+
+    ;mov rdi, tamanoHashSecundario
+    ;mov rsi, rax
+    ;mov rax, 0
+    ;call printf
+
+    ;add rsp, 20h
+
+    ;pop rax
+
+    ;sub rsp, 20h
+
+    ;mov rdi, formato
+    ;mov rsi, [sha]
+    ;mov rax, 0
+
+    ;call printf
+
+    ;add rsp, 20h
+
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     ;--------------------------------------------------------------------------
 
     mov rcx, 0                          ;Comparar las cadenas.
-    mov rsi, rax
+    mov rsi, [sha]
     mov rdi, [hash]
     mov rcx, [hashLen]
     repe cmpsb
@@ -238,19 +270,19 @@ readLoop:
     jmp encontrado 
 
 noEncontrado:
-    sub rsp, 20h
 
+    sub rsp, 20h
     mov rdi, hashNoEncontrado             ;Imprimir el borde punteado.
     mov rax, 0
     call printf
-
     add rsp, 20h
     jmp Salida
+    
 encontrado: 
 
     sub rsp, 20h
 
-    mov rdi, hashEncontrado             ;Imprimir el borde punteado.
+    mov rdi, hashEncontrado                 ;Imprimir estado de encontrado.
     mov rsi, [directorioHash]
     mov rdx, buffer
     mov rax, 0
@@ -391,11 +423,11 @@ readLine:
 
 loop:
     inc qword [lineSize]
-    inc qword [nchar]
     cmp byte [r8], byte 0xA
     jne increment
     jmp continue
 increment:
+    inc qword [nchar]
     add qword r8, 1
     jmp loop
 continue:
