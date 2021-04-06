@@ -4,7 +4,7 @@
 #include <string.h>
 
 //Algoritmo de SHA512, main in c++.
-extern "C" void start(SHA512& sha512, char* msg, char* dictionary);
+extern "C" void start(Local::SHA512& sha, char* msg, char* dictionary);
 
 int getSize(char* msg){
 	return strlen(msg);
@@ -12,7 +12,7 @@ int getSize(char* msg){
 
 int main(int argc, char *argv[]){
 	(void)argc;
-	SHA512 sha512;
+	Local::SHA512 sha;
 	char* dictionary;
 	char* ptr = strstr(argv[1], "--wordlist=");
 	if(ptr != NULL){
@@ -20,6 +20,6 @@ int main(int argc, char *argv[]){
 		dictionary = (char*)malloc(sizeof(char)*len);
 		strncpy(dictionary, ptr+11, len);
 	}
-	start(sha512, argv[2], dictionary);
+	start(sha, argv[2], dictionary);
 	return 0;
 }

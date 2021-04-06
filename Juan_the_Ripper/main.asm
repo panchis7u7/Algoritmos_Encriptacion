@@ -1,4 +1,5 @@
-extern _ZN6SHA5124hashEPKc              ;Funcion para hashear.
+;extern _ZN6SHA5124hashEPKc            ;Funcion para hashear (Local).
+extern _ZN5Local6SHA5127hashSSLEPc          ;Funcion para hashear (SSL).
 extern _Z7getSizePc                     ;funcion para obtener el tamano.
 extern printf                           ;Funcion para imprimir.
 section .data
@@ -118,8 +119,8 @@ start:
     ;--------------------------------------------------------------------------
 
     ;Archivo que contiene el hash.
-    mov rax, NR_open                    ;Syscall Open -> 2.
-    mov rdi, [directorioHash]           ;Ruta del archivo.
+    mov rax, NR_open                        ;Syscall Open -> 2.
+    mov rdi, [directorioHash]               ;Ruta del archivo.
     mov rsi, O_RDWR                     
     syscall
     mov qword [FD], rax
@@ -137,11 +138,9 @@ start:
 
     ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ;sub rsp, 20h
-
     ;mov rdi, tamanoHashPrincipal
     ;mov rsi, [hashLen]
     ;call printf
-
     ;add rsp, 20h
     ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -224,39 +223,29 @@ readLoop:
     sub rsp, 20h                        ;Espacio de sombra para *this, input.
 
     mov rdi, [this]                     ;Apuntador que hace referencia al objeto.
-    mov rsi, rax                         ;Pasar como argumento el mensaje.
-    call _ZN6SHA5124hashEPKc            ;llamar la funcion hash(char* input).
+    mov rsi, rax                        ;Pasar como argumento el mensaje.
+    call _ZN5Local6SHA5127hashSSLEPc    ;llamar la funcion hash(char* input).
     mov qword [sha], rax                ;Guardar el hash (valor de retorno).
 
     add rsp, 20h                        ;Reestablecer la pila.
 
     ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     ;push rax
-
     ;mov rdi, [sha]
     ;call _Z7getSizePc
-
     ;sub rsp, 20h
-
     ;mov rdi, tamanoHashSecundario
     ;mov rsi, rax
     ;mov rax, 0
     ;call printf
-
     ;add rsp, 20h
-
     ;pop rax
-
     ;sub rsp, 20h
-
     ;mov rdi, formato
     ;mov rsi, [sha]
     ;mov rax, 0
-
     ;call printf
-
     ;add rsp, 20h
-
     ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     ;--------------------------------------------------------------------------
@@ -272,7 +261,7 @@ readLoop:
 noEncontrado:
 
     sub rsp, 20h
-    mov rdi, hashNoEncontrado             ;Imprimir el borde punteado.
+    mov rdi, hashNoEncontrado           ;Imprimir el borde punteado.
     mov rax, 0
     call printf
     add rsp, 20h
@@ -282,7 +271,7 @@ encontrado:
 
     sub rsp, 20h
 
-    mov rdi, hashEncontrado                 ;Imprimir estado de encontrado.
+    mov rdi, hashEncontrado             ;Imprimir estado de encontrado.
     mov rsi, [directorioHash]
     mov rdx, buffer
     mov rax, 0
@@ -291,15 +280,17 @@ encontrado:
     add rsp, 20h
 
     ;--------------------------------------------------------------------------
-
+    
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    
     ;sub rsp, 20h
-
     ;mov rax, 0
     ;mov rdi, formato                   ;Imprimir el hash.
     ;mov rsi, [sha]
     ;call printf
-
     ;add rsp, 20h
+
+    ;%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     mov rax, 3
     mov rdi, [FD]                       ;Cerrar el descriptor de datos
@@ -410,8 +401,10 @@ readLine:
     mov rax, NR_read                    ;Syscall read.
     syscall
 
-    cmp rax, 0                          ;Checar si hay errores.
+    cmp rax, 0                          ;Checar si es el final del archivo.
     je endOfFile
+
+    cmp rax, 0                          ;Checar si hubo errores.
     jl readError
 
     mov r8 , buffer                     ;Generar otro apuntador para no 

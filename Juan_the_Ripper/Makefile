@@ -9,7 +9,7 @@ OBJS= hashMain.o SHA512.o main.o
 default: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CPP) $(CPPFLAGS) -g $(OBJS) -o $(PROG)
+	$(CPP) $(CPPFLAGS) -g $(OBJS) -o $(PROG) -lssl -lcrypto
 
 hashMain.o: hashMain.cpp
 SHA512.o: SHA512.cpp SHA512.hpp
