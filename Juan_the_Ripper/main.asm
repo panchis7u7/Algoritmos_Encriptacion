@@ -1,5 +1,5 @@
-;extern _ZN6SHA5124hashEPKc            ;Funcion para hashear (Local).
-extern _ZN5Local6SHA5127hashSSLEPc          ;Funcion para hashear (SSL).
+;extern _ZN6SHA5124hashEPKc             ;Funcion para hashear (Local).
+extern _ZN5Local6SHA5127hashSSLEPc      ;Funcion para hashear (SSL).
 extern _Z7getSizePc                     ;funcion para obtener el tamano.
 extern printf                           ;Funcion para imprimir.
 section .data
@@ -62,7 +62,7 @@ section .data
     %define KCYN  `\x1B[36m`
     %define KWHT  `\x1B[37m`
 
-    strLimite db KCYN,`--------------------------------------------------------`,0xA,0x0
+    strLimite db KCYN,`--------------------------------------------------------`, KWHT,0xA,0x0
     nombreAplicacion db KYEL,`\t\tJuan the Ripper\n`,0xA,0x0
     archivoCargado db KWHT, `Diccionario cargado:`, KYEL, ` %s`,0xA,0x0
     hashCargado db KWHT, `Hash cargado:`, KYEL, ` %s`,0xA,0x0
