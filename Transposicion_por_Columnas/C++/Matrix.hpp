@@ -11,13 +11,15 @@ namespace mat {
         Matrix(unsigned int filas, unsigned int columnas);
         virtual ~Matrix();
         Matrix(const Matrix &mat) {this->data = mat.data;};
-        void print();
         void aleatorizar();
+        friend std::ostream& operator<< <> (std::ostream& out, const Matrix<T>& mat);
+        friend std::ostream& operator<< <> (std::ostream& out, const Matrix<T>* mat);
     private:
         T** data;
         unsigned int filas;
         unsigned int columnas;
     protected:
     };
-    typedef Matrix<char*> mat2Ds;
+
+    typedef Matrix<char*> mc2d;
 }

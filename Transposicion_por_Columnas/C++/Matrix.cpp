@@ -23,21 +23,6 @@ namespace mat {
     }
 
     template <class T>
-    void Matrix<T>::print() {
-	    for (size_t i = 0; i < filas; i++)
-	    {
-	    	std::cout << "|";
-	    	for (size_t j = 0; j < columnas; j++)
-	    	{
-	    		std::cout << "  " << this->data[i][j] << "  ";
-	    	}
-	    	std::cout << "|";
-	    	std::cout << std::endl;
-	    }
-	    std::cout << std::endl;
-    }
-
-    template <class T>
     void Matrix<T>::aleatorizar() {
 	    for (size_t i = 0; i < this->filas; i++)
 	    {
@@ -49,4 +34,35 @@ namespace mat {
 	    }
     }
 
+	template <class T>
+	std::ostream& operator<<(std::ostream& out, const Matrix<T>& mat){
+		for (size_t i = 0; i < mat.filas; i++)
+	    {
+	    	out << "|";
+	    	for (size_t j = 0; j < mat.columnas; j++)
+	    	{
+	    		out << "  " << mat.data[i][j] << "  ";
+	    	}
+	    	out << "|";
+	    	out << std::endl;
+	    }
+	    out << std::endl;	
+		return out;
+	}
+
+	template <class T>
+	std::ostream& operator<<(std::ostream& out, const Matrix<T>* mat){
+		for (size_t i = 0; i < mat->filas; i++)
+	    {
+	    	out << "|";
+	    	for (size_t j = 0; j < mat->columnas; j++)
+	    	{
+	    		out << "  " << mat->data[i][j] << "  ";
+	    	}
+	    	out << "|";
+	    	out << std::endl;
+	    }
+	    out << std::endl;	
+		return out;
+	}
 }
