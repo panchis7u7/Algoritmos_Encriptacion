@@ -21,5 +21,5 @@ namespace mat {
     protected:
     };
 
-    typedef Matrix<char*> mc2d;
+    typedef Matrix<char> mc2d;
 }
