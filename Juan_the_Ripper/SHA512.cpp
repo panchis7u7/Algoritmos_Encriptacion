@@ -59,8 +59,8 @@ namespace Local {
 	}
 	
 	char* SHA512::hash(const char* input){
-		size_t nBuffer; //amt of message blocks
-		uint64** buffer; //message blocks of size 1024bits wtih 16 64bit words
+		size_t nBuffer; 	//amt of message blocks
+		uint64** buffer; 	//message blocks of size 1024bits wtih 16 64bit words
 		uint64* h = new uint64[8];
 		buffer = preprocess((unsigned char*)input, nBuffer);
 		process(buffer, nBuffer, h);
