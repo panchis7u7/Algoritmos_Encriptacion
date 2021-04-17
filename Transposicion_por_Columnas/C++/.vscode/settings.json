@@ -44,5 +44,20 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "Estudiantes",
+            "database": "Estudiantes",
+            "username": "root",
+            "password": "p0NcHIT0140600@"
+        }
+    ]
 }

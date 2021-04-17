@@ -5,19 +5,30 @@
 int main(int argc, char* argv[]){
     int opt;
     std::string mensaje = "Ingrese su mensaje! con la opcion -t!";
-    while((opt = getopt(argc, argv, ":t:f:lrx:")) != -1){
+    mat::Matrix<char>* matriz;
+    while((opt = getopt(argc, argv, ":t:cfd")) != -1){
         switch(opt){
             case 't':
                 mensaje = optarg;
                 break;
             case 'f':
-                printf("opcion f.\n");
+                printf("Cifrado por filas.\n");
                 break;
-            case 'l':
-                printf("opcion l.\n");
+            case 'c':
+                printf("cifrado por columnas.\n");
+                matriz = new mat::Matrix<char>(mensaje);
+                std::cout << matriz << std::endl;
+                std::cout << "El mensaje encriptado es: " << std::endl;
+                mat::Matrix<char>::transpuesta(*matriz);
+                std::cout << matriz->getMessage() << std::endl;
                 break;
-            case 'r':
-                printf("opcion r.\n");
+            case 'd':
+                printf("decifrado.\n");
+                matriz = new mat::Matrix<char>(mensaje);
+                std::cout << matriz << std::endl;
+                std::cout << "El mensaje desencriptado es: " << std::endl;
+                mat::Matrix<char>::transpuesta(*matriz);
+                std::cout << matriz->getMessage() << std::endl;
                 break;
             case ':':
                 printf("opcion no soportada.\n");
@@ -28,8 +39,13 @@ int main(int argc, char* argv[]){
         }
     }
 
+    //Ho&epmseo&Vslaa!leedarl@asnentu@&tg&eed@caoet&a@os&laar@m?d&&&t@
+
     //mat::Matrix<char> prueba("Hola Como Estas? Te Saludo Desde Marte!!!!, Mi Contrasena Es 123456");
-    mat::Matrix<char> mensajeEncriptado(mensaje);
-    std::cout << mensajeEncriptado << std::endl;
+    //mat::Matrix<char> mensajeEncriptado(mensaje);
+    //std::cout << mensajeEncriptado.getMessage() << std::endl;
+
+    //mat::Matrix<char>::transpuesta(mensajeEncriptado);
+    //std::cout << mensajeEncriptado << std::endl;
     return 0;
 }
