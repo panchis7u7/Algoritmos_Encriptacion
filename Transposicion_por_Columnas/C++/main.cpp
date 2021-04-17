@@ -4,10 +4,11 @@
 
 int main(int argc, char* argv[]){
     int opt;
+    std::string mensaje = "Ingrese su mensaje! con la opcion -t!";
     while((opt = getopt(argc, argv, ":t:f:lrx:")) != -1){
         switch(opt){
             case 't':
-                std::cout << optarg << std::endl;
+                mensaje = optarg;
                 break;
             case 'f':
                 printf("opcion f.\n");
@@ -27,7 +28,8 @@ int main(int argc, char* argv[]){
         }
     }
 
-    mat::Matrix<char> prueba("Hola Como Estas? Te Saludo Desde Marte!!!!, Mi Contrasena Es 123456");
-    std::cout << prueba << std::endl;
+    //mat::Matrix<char> prueba("Hola Como Estas? Te Saludo Desde Marte!!!!, Mi Contrasena Es 123456");
+    mat::Matrix<char> mensajeEncriptado(mensaje);
+    std::cout << mensajeEncriptado << std::endl;
     return 0;
 }
