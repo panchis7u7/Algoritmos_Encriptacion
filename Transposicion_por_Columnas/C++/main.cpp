@@ -27,7 +27,7 @@ int main(int argc, char* argv[]){
         }
     }
 
-    mat::Matrix<char> prueba("HolaComoEstas?TeSaludoDesdeMarte!!!!MiContrasenaEs123456");
+    mat::Matrix<char> prueba("Hola Como Estas? Te Saludo Desde Marte!!!!, Mi Contrasena Es 123456");
     std::cout << prueba << std::endl;
     return 0;
 }

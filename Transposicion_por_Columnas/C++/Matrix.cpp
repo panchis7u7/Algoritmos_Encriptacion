@@ -30,7 +30,8 @@ namespace mat {
 	    {
 			for (size_t j = 0; j < this->columnas; j++)
 			{
-				this->data[i][j] = message.at(index);
+				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+					+ ((message[index] == ' ')*38);
 				index++;
 			}
 	    }
