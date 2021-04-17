@@ -67,7 +67,7 @@ int main(int argc, char* argv[]){
                     switch (getsubopt(&subopts, decrypt_opts, &value))
                     {
                     case COL_OPTION:
-                        printf("decifrado.\n");
+                        printf("Descifrado por columnas:\n");
                         matriz = new mat::Matrix<char>(mensaje);
                         std::cout << matriz << std::endl;
                         std::cout << "El mensaje desencriptado es: " << std::endl;
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]){
                         break;
                     
                     case ROW_OPTION:
-                        printf("decifrado.\n");
+                        printf("Descifrado por filas:\n");
                         matriz = new mat::Matrix<char>(mensaje);
                         std::cout << matriz << std::endl;
                         std::cout << "El mensaje desencriptado es: " << std::endl;
@@ -99,6 +99,10 @@ int main(int argc, char* argv[]){
                         trim(res);
                         std::cout << res << std::endl;
                         break;
+
+                    default:
+                        std::cout << "Ingrese una opcion valida. ya sea --col o --row." << std::endl;
+                        break;
                     }
                 }
                 break;
@@ -112,12 +116,5 @@ int main(int argc, char* argv[]){
     }
 
     //Ho&epmseo&Vslaa!leedarl@asnentu@&tg&eed@caoet&a@os&laar@m?d&&&t@
-
-    //mat::Matrix<char> prueba("Hola Como Estas? Te Saludo Desde Marte!!!!, Mi Contrasena Es 123456");
-    //mat::Matrix<char> mensajeEncriptado(mensaje);
-    //std::cout << mensajeEncriptado.getMessage() << std::endl;
-
-    //mat::Matrix<char>::transpuesta(mensajeEncriptado);
-    //std::cout << mensajeEncriptado << std::endl;
     return 0;
 }
