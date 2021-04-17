@@ -1,13 +1,18 @@
 CPP=g++
-CPPFLAGS=-Wall -Wextra -Werror -pedantic-errors -std=c++2a -no-pie
-PROG=mat
+CPPFLAGS=-pedantic-errors -std=c++2a
+PROG=matrix
 
 OBJS= Matrix.o main.o
 
-default: $(PROG)
+all: $(PROG)
 
 $(PROG): $(OBJS)
-	$(CPP) $(CPPFLAGS) -g $(OBJS) -o $(PROG)
+	$(CPP) $(CPPFLAGS) $(OBJS) -o $(PROG)
 
-main.o: main.cpp
 Matrix.o: Matrix.cpp Matrix.hpp
+main.o: main.cpp
+
+clean:
+	rm Matrix.o
+	rm main.o
+	rm matrix

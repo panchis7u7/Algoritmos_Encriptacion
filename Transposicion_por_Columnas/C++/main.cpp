@@ -26,15 +26,8 @@ int main(int argc, char* argv[]){
                 break;
         }
     }
-    mat::Matrix<int>* a = new mat::Matrix<int>(4,4);
-    a->aleatorizar();
-    std::cout << a;
 
-    mat::Matrix<int> b(2,2);
-    b.aleatorizar();
-    std::cout << b;
-
-    mat::mc2d prueba(2,2);
-
+    mat::Matrix<char> prueba("HolaComoEstas?TeSaludoDesdeMarte!!!!MiContrasenaEs123456");
+    std::cout << prueba << std::endl;
     return 0;
 }

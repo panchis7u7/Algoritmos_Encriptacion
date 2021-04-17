@@ -1,4 +1,6 @@
 #include "Matrix.hpp"
+#include <string.h>
+#include <math.h>
 
 namespace mat {
     
@@ -13,6 +15,27 @@ namespace mat {
 	    }
     }
 
+	template <class T>
+	Matrix<T>::Matrix(std::string message){
+		float len = ceil(sqrt(message.length()));
+		int padding =(pow(len, 2) - message.length());
+		for(size_t i = 0; i < padding; ++i){
+			message += "@";
+		}
+			
+		this->data = alloc(len, len);
+
+		int index = 0;
+		for (size_t i = 0; i < this->filas; i++)
+	    {
+			for (size_t j = 0; j < this->columnas; j++)
+			{
+				this->data[i][j] = message.at(index);
+				index++;
+			}
+	    }
+	}
+
     template <class T>
     Matrix<T>::~Matrix(){
         for (size_t i = 0; i < this->filas; i++)
@@ -21,6 +44,18 @@ namespace mat {
 	    }
 	    delete[] data;
     }
+
+	template <class T>
+	T** Matrix<T>::alloc(unsigned int filas, unsigned int columnas){
+		this->filas = filas;
+	    this->columnas = columnas;
+	    this->data = new char* [this->filas];
+	    for (size_t i = 0; i < this->filas; i++)
+	    {
+	    	this->data[i] = new char[this->columnas];
+	    }
+		return this->data;
+	}
 
     template <class T>
     void Matrix<T>::aleatorizar() {
