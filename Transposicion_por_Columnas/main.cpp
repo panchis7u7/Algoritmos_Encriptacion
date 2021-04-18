@@ -7,60 +7,97 @@
 #include <locale>
 
 // trim from start
-static inline std::string &ltrim(std::string &s) {
+static inline std::string& ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
             std::not1(std::ptr_fun<int, int>(std::isspace))));
     return s;
 }
 
 // trim from end
-static inline std::string &rtrim(std::string &s) {
+static inline std::string& rtrim(std::string& s) {
     s.erase(std::find_if(s.rbegin(), s.rend(),
             std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
     return s;
 }
 
 // trim from both ends
-static inline std::string &trim(std::string &s) {
+static inline std::string& trim(std::string& s) {
     return ltrim(rtrim(s));
 }
 
 enum {
-  COL_OPTION = 0,
-  ROW_OPTION = 1
+  NO_KEY_OPTION = 0
 };
 
-char colOption[] = "--col";
-char rowOption[] = "--row";
+char noKeyOption[] = "--nokey";
 
 char* decrypt_opts[] = {
-  colOption,
-  rowOption
+  noKeyOption
 };
 
 int main(int argc, char* argv[]){
     char* subopts, *value;
     int opt;
     std::string mensaje = "Ingrese su mensaje! con la opcion -t!";
+    std::string key = "";
     mat::Matrix<char>* matriz;
     std::string res;
-    while((opt = getopt(argc, argv, ":t:cfd:")) != -1){
+    while((opt = getopt(argc, argv, ":t:c:f:d:")) != -1){
         switch(opt){
             case 't':
                 mensaje = optarg;
                 break;
             case 'f':
-                printf("Cifrado por filas.\n");
+                subopts = optarg;
+                while (*subopts != '\0')
+                {
+                    switch (getsubopt(&subopts, decrypt_opts, &value))
+                    {
+                    case NO_KEY_OPTION:
+                        printf("Cifrado por filas.\n");
+                        matriz = new mat::Matrix<char>(mensaje);
+                        mat::Matrix<char>::transpuesta(*matriz);
+                        std::cout << matriz << std::endl;
+                        std::cout << "El mensaje encriptado es: " << std::endl;
+                        std::cout << matriz->getMessage() << std::endl;
+                        break;
+                    default:
+                        std::cout << "Cifrado por filas usando como llave a: " << value << "." << std::endl;
+                        matriz = new mat::Matrix<char>(mensaje, value);
+                        mat::Matrix<char>::transpuesta(*matriz);
+                        std::cout << matriz << std::endl;
+                        std::cout << "El mensaje encriptado es: " << std::endl;
+                        std::cout << matriz->getMessage() << std::endl;
+                        break;
+                    }
+                }
                 break;
             case 'c':
-                printf("cifrado por columnas.\n");
-                matriz = new mat::Matrix<char>(mensaje);
-                std::cout << matriz << std::endl;
-                std::cout << "El mensaje encriptado es: " << std::endl;
-                mat::Matrix<char>::transpuesta(*matriz);
-                std::cout << matriz->getMessage() << std::endl;
+                subopts = optarg;
+                while (*subopts != '\0')
+                {
+                    switch (getsubopt(&subopts, decrypt_opts, &value))
+                    {
+                    case NO_KEY_OPTION:
+                        printf("Cifrado por columnas.\n");
+                        matriz = new mat::Matrix<char>(mensaje);
+                        mat::Matrix<char>::transpuesta(*matriz);
+                        std::cout << matriz << std::endl;
+                        std::cout << "El mensaje encriptado es: " << std::endl;
+                        std::cout << matriz->getMessage() << std::endl;
+                        break;
+                    default:
+                        std::cout << "Cifrado por columnas usando como llave a: " << value << "." << std::endl;
+                        matriz = new mat::Matrix<char>(mensaje, value);
+                        std::cout << matriz << std::endl;
+                        std::cout << "El mensaje encriptado es: " << std::endl;
+                        mat::Matrix<char>::transpuesta(*matriz);
+                        std::cout << matriz->getMessage() << std::endl;
+                        break;
+                    }
+                }
                 break;
-            case 'd':
+            case 'd':/*
                 subopts = optarg;
                 while (*subopts != '\0')
                 {
@@ -104,7 +141,7 @@ int main(int argc, char* argv[]){
                         std::cout << "Ingrese una opcion valida. ya sea --col o --row." << std::endl;
                         break;
                     }
-                }
+                }*/
                 break;
             case ':':
                 printf("opcion no soportada.\n");

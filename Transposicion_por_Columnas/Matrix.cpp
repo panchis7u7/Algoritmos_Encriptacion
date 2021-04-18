@@ -28,6 +28,36 @@ namespace mat {
 	    }
 	}
 
+	template <class T>
+	Matrix<T>::Matrix(std::string message, std::string key){
+		//float len = ceil(sqrt(message.length()));
+		std::replace(key.begin(), key.end(), ' ', '&');
+		float columnas = key.length();
+		float filas = (ceil((message.length()/columnas)) + 1);
+		int padding = ((filas * columnas) - (columnas + message.length()));
+		for(size_t i = 0; i < padding; ++i){
+			message += "@";
+		}
+
+		this->filas = filas;
+		this->columnas = columnas;	
+		this->data = Matrix<T>::alloc(filas, columnas);
+
+		int index = 0;
+
+		strncpy(this->data[0], key.c_str(), key.length());
+
+		for (size_t i = 1; i < this->filas; i++)
+	    {
+			for (size_t j = 0; j < this->columnas; j++)
+			{
+				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+					+ ((message[index] == ' ')*38);
+				index++;
+			}
+	    }
+	}
+
     template <class T>
     Matrix<T>::~Matrix(){
         this->freeData();
@@ -77,6 +107,9 @@ namespace mat {
 			}
 		}
 		matrix.freeData();
+		unsigned int filas = matrix.filas;
+		matrix.filas = matrix.columnas;
+		matrix.columnas = filas;
 		matrix.data = data;
 	}
 

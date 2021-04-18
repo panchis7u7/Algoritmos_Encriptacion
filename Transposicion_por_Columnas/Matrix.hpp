@@ -9,9 +9,9 @@ namespace mat {
     class Matrix {
     public:
         Matrix(std::string message);
-        virtual ~Matrix();
+        Matrix(std::string message, std::string key);
         Matrix(const Matrix &mat) {this->data = mat.data;};
-        Matrix<T>(const char* mensaje);
+        virtual ~Matrix();
         void freeData();
         std::string getMessage();
         static void transpuesta(Matrix<T>& matrix);
