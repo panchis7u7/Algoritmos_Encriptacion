@@ -1,6 +1,7 @@
 #include "Matrix.hpp"
 #include <string.h>
 #include <math.h>
+#include <random>
 
 namespace mat {
 
@@ -58,15 +59,22 @@ namespace mat {
 	    }
 
 		Matrix<T>::transpuesta(*this);
+		std::cout << this << std::endl;
+
+		//Randomize the matrix.
+		std::random_device device;
+		std::mt19937 rng(device());
+		//Uniform random numbers.
+		std::uniform_int_distribution<int> gen(0, this->filas-1);
+		unsigned int r;
+
+		//Fisher–Yates algorithm.
+		for (int i = this->filas-1; i != 0; i--) {
+			r = gen(rng); 
+    		std::swap(this->data[i], this->data[r]); 
+    	} 
+
 		std::cout << this <<std::endl;
-
-		/*for (size_t j = 0; j < this->columnas; j++)
-		{
-			this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
-				+ ((message[index] == ' ')*38);
-			index++;
-		}*/
-
 	}
 
     template <class T>
