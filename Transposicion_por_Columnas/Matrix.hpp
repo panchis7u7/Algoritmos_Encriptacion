@@ -14,6 +14,7 @@ namespace mat {
         virtual ~Matrix();
         void freeData();
         std::string getMessage();
+        std::string getMessage(std::string key);
         static void transpuesta(Matrix<T>& matrix);
         friend std::ostream& operator<< <> (std::ostream& out, const Matrix<T>& mat);
         friend std::ostream& operator<< <> (std::ostream& out, const Matrix<T>* mat);

@@ -30,7 +30,7 @@ namespace mat {
 
 	template <class T>
 	Matrix<T>::Matrix(std::string message, std::string key){
-		//float len = ceil(sqrt(message.length()));
+		srand(time(0));
 		std::replace(key.begin(), key.end(), ' ', '&');
 		float columnas = key.length();
 		float filas = (ceil((message.length()/columnas)) + 1);
@@ -56,6 +56,17 @@ namespace mat {
 				index++;
 			}
 	    }
+
+		Matrix<T>::transpuesta(*this);
+		std::cout << this <<std::endl;
+
+		/*for (size_t j = 0; j < this->columnas; j++)
+		{
+			this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+				+ ((message[index] == ' ')*38);
+			index++;
+		}*/
+
 	}
 
     template <class T>
@@ -82,6 +93,12 @@ namespace mat {
 	    		message += this->data[i][j];
 	    	}
 	    }
+		return message;
+	}
+
+	template <class T>
+	std::string Matrix<T>::getMessage(std::string key){
+		std::string message = "";
 		return message;
 	}
 
