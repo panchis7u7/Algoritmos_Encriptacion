@@ -48,7 +48,9 @@ int main(int argc, char* argv[]){
     char* subopts, *value;
     int opt;
 
-    std::cout << "-------------------------------------------------------------------------------------" << KCYN << std::endl;
+    std::cout << KCYN << "-------------------------------------------------------------------------------------\n" << std::endl;
+    std::cout << KYEL << "\t\t\tAlgoritmos por transposicion o permutacion." << std::endl;
+    std::cout << KRED << "\t\t\t    Carlos Sebastian Madrigal Rodriguez\n" << KWHT << std::endl;
     std::string mensaje = "Ingrese su mensaje! con la opcion -t!";
     std::string key = "";
     mat::Matrix<char>* matriz;
@@ -65,20 +67,20 @@ int main(int argc, char* argv[]){
                     switch (getsubopt(&subopts, decrypt_opts, &value))
                     {
                     case NO_KEY_OPTION:
-                        printf("Cifrado por filas.\n");
+                        std::cout << KWHT << "Cifrado por filas:\n" << std::endl;
                         matriz = new mat::Matrix<char>(mensaje);
                         mat::Matrix<char>::transpose(*matriz);
                         std::cout << matriz << std::endl;
-                        std::cout << "El mensaje encriptado es: " << std::endl;
-                        std::cout << matriz->getMessage() << std::endl;
+                        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                        std::cout << KYEL << matriz->getMessage() << std::endl;
                         break;
                     default:
-                        std::cout << "Cifrado por filas usando como llave a: " << value << "." << std::endl;
+                        std::cout << KWHT << "Cifrado por filas usando como llave a: " << KYEL << value << KWHT << ".\n" << std::endl;
                         matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::crypt);
                         mat::Matrix<char>::transpose(*matriz);
                         std::cout << matriz << std::endl;
-                        std::cout << "El mensaje encriptado es: " << std::endl;
-                        std::cout << matriz->getMessage() << std::endl;
+                        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                        std::cout << KYEL << matriz->getMessage() << std::endl;
                         break;
                     }
                 }
@@ -90,20 +92,20 @@ int main(int argc, char* argv[]){
                     switch (getsubopt(&subopts, decrypt_opts, &value))
                     {
                     case NO_KEY_OPTION:
-                        printf("Cifrado por columnas.\n");
+                        std::cout << KWHT << "Cifrado por columnas: \n" << std::endl;
                         matriz = new mat::Matrix<char>(mensaje);
                         std::cout << matriz << std::endl;
                         mat::Matrix<char>::transpose(*matriz);
-                        std::cout << "El mensaje encriptado es: " << std::endl;
-                        std::cout << matriz->getMessage() << std::endl;
+                        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                        std::cout << KYEL << matriz->getMessage() << std::endl;
                         break;
                     default:
-                        std::cout << "Cifrado por columnas usando como llave a: " << value << "." << std::endl;
+                        std::cout << KWHT << "Cifrado por columnas usando como llave a: " << KYEL << value << KWHT << ".\n" << std::endl;
                         matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::crypt);
                         std::cout << matriz << std::endl;
                         mat::Matrix<char>::transpose(*matriz);
-                        std::cout << "El mensaje encriptado es: " << std::endl;
-                        std::cout << matriz->getMessage() << std::endl;
+                        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                        std::cout << KYEL << matriz->getMessage() << std::endl;
                         break;
                     }
                 }
@@ -118,7 +120,7 @@ int main(int argc, char* argv[]){
                         printf("Descifrado de mensaje:\n");
                         matriz = new mat::Matrix<char>(mensaje);
                         std::cout << matriz << std::endl;
-                        std::cout << "El mensaje desencriptado es: " << std::endl;
+                        std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
                         mat::Matrix<char>::transpose(*matriz);
                         res = matriz->getMessage();
                         for (size_t i = 0; i < res.length(); i++)
@@ -128,13 +130,13 @@ int main(int argc, char* argv[]){
                             + ((res[i] == '@')*32);
                         }
                         trim(res);
-                        std::cout << res << std::endl;
+                        std::cout << KYEL << res << std::endl;
                         break;
                     default:
-                        std::cout << "Descifrado usando como llave a: " << value << "." << std::endl;
+                        std::cout << "Descifrado usando como llave a: " << value << ".\n" << std::endl;
                         matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::decrypt);
                         std::cout << matriz << std::endl;
-                        std::cout << "El mensaje desencriptado es: " << std::endl;
+                        std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
                         res = matriz->getMessage(value);
                         for (size_t i = 0; i < res.length(); i++)
                         {
@@ -143,21 +145,21 @@ int main(int argc, char* argv[]){
                             + ((res[i] == '@')*32);
                         }
                         trim(res);
-                        std::cout << res << std::endl;
+                        std::cout << KYEL << res << std::endl;
                         break;
                     }
                 }
                 break;
             case ':':
-                printf("opcion no soportada.\n");
+                std::cout << KRED << "Opcion no soportada." << std::endl;
                 break;
             case '?':
-                printf("opcion desconocida.\n");
+                std::cout << KRED << "Opcion Desconocida." << std::endl;
                 break;
         }
     }
 
-    std::cout << "-------------------------------------------------------------------------------------" << KCYN << std::endl;
+    std::cout << KCYN << "\n-------------------------------------------------------------------------------------" << KCYN << std::endl;
     //Ho&epmseo&Vslaa!leedarl@asnentu@&tg&eed@caoet&a@os&laar@m?d&&&t@
     return 0;
 }

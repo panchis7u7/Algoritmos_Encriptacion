@@ -12,6 +12,9 @@ namespace mat {
 		this->data = alloc(rows, columns);
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Create matrix cypher without key.
+
 	template <class T>
 	Matrix<T>::Matrix(std::string message){
 		float len = ceil(sqrt(message.length()));
@@ -35,6 +38,11 @@ namespace mat {
 			}
 	    }
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Create matrix cypher with key.
 
 	template <class T>
 	Matrix<T>::Matrix(std::string message, std::string key, opcodes opcode){
@@ -65,8 +73,6 @@ namespace mat {
 					index++;
 				}
 	    	}	
-
-			std::cout << this << std::endl;
 
 			Matrix<T>::transpose(*this);
 
@@ -121,10 +127,20 @@ namespace mat {
 		}
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Matrix object destructor.
+
     template <class T>
     Matrix<T>::~Matrix(){
         this->freeData();
     }
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Matrix 2D data release.
 
 	template <class T>
 	void Matrix<T>::freeData(){
@@ -134,6 +150,11 @@ namespace mat {
 	    }
 	    delete[] this->data;
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Obtain uncyphered text from cyphered matrix.
 
 	template <class T>
 	std::string Matrix<T>::getMessage(){
@@ -148,12 +169,18 @@ namespace mat {
 		return message;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Obtain uncyphered text from key cyphered matrix.
+
 	template <class T>
 	std::string Matrix<T>::getMessage(std::string key){
 		std::replace(key.begin(), key.end(), ' ', '&');
 		T** orderedCols = Matrix<T>::alloc(this->rows, this->columns);
 		int* arr = (int*)malloc(sizeof(int) * key.length());
 		memset(arr, 0, (sizeof(int) * key.length()));
+
 		for (size_t i = 0; i < key.length(); i++)
 		{
 			for (size_t j = 0; j < this->rows; j++)
@@ -168,13 +195,16 @@ namespace mat {
 
 		for(int i = 0; i < this->rows; i++)
 			this->data[i] = orderedCols[i];
-		
-		std::cout << this << std::endl;
-		Matrix<T>::transpose(this);
-		std::cout << this << std::endl;
+
+		Matrix<T>::transpose(*this);
 
 		return this->getMessage();
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//2D matrix data allocator.
 
 	template <class T>
 	T** Matrix<T>::alloc(unsigned int rows, unsigned int columns){
@@ -186,22 +216,10 @@ namespace mat {
 		return data;
 	}
 
-	template <class T>
-	void Matrix<T>::transpose(Matrix<T>* matrix) {
-		T** data = Matrix<T>::alloc(matrix->columns, matrix->rows);
+	////////////////////////////////////////////////////////////////////////////////////////
 
-		for (size_t i = 0; i < matrix->rows; i++)
-		{
-			for (size_t j = 0; j < matrix->columns; j++)
-			{
-				data[j][i] = matrix->data[i][j];
-			}
-		}
-		unsigned int rows = matrix->rows;
-		matrix->rows = matrix->columns;
-		matrix->columns = rows;
-		matrix->data = data;
-	}
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Matrix transpose operation.
 
 	template <class T>
 	void Matrix<T>::transpose(Matrix<T>& matrix){
@@ -221,35 +239,47 @@ namespace mat {
 		matrix.data = data;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Matrix output stream operator overload for references.
+
 	template <class T>
 	std::ostream& operator<<(std::ostream& out, const Matrix<T>& mat){
 		for (size_t i = 0; i < mat.rows; i++)
 	    {
-	    	out << "|";
+	    	out << "\x1B[37m" << "|";
 	    	for (size_t j = 0; j < mat.columns; j++)
 	    	{
-	    		out << "  " << mat.data[i][j] << "  ";
+	    		out << "  " << "\x1B[32m" << mat.data[i][j] << "  ";
 	    	}
-	    	out << "|";
+	    	out << "\x1B[37m" << "|";
 	    	out << std::endl;
 	    }
 	    out << std::endl;	
 		return out;
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Matrix output stream operator overload for pointers.
+
 	template <class T>
 	std::ostream& operator<<(std::ostream& out, const Matrix<T>* mat){
 		for (size_t i = 0; i < mat->rows; i++)
 	    {
-	    	out << "|";
+	    	out << "\x1B[37m" << "|";
 	    	for (size_t j = 0; j < mat->columns; j++)
 	    	{
-	    		out << "  " << mat->data[i][j] << "  ";
+	    		out << "  " << "\x1B[32m" << mat->data[i][j] << "  ";
 	    	}
-	    	out << "|";
+	    	out << "\x1B[37m" << "|";
 	    	out << std::endl;
 	    }
 	    out << std::endl;	
 		return out;
 	}
 }
+
+	////////////////////////////////////////////////////////////////////////////////////////
