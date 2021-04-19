@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
                         break;
                     default:
                         std::cout << "Cifrado por filas usando como llave a: " << value << "." << std::endl;
-                        matriz = new mat::Matrix<char>(mensaje, value);
+                        matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::crypt);
                         mat::Matrix<char>::transpose(*matriz);
                         std::cout << matriz << std::endl;
                         std::cout << "El mensaje encriptado es: " << std::endl;
@@ -81,17 +81,17 @@ int main(int argc, char* argv[]){
                     case NO_KEY_OPTION:
                         printf("Cifrado por columnas.\n");
                         matriz = new mat::Matrix<char>(mensaje);
-                        mat::Matrix<char>::transpose(*matriz);
                         std::cout << matriz << std::endl;
+                        mat::Matrix<char>::transpose(*matriz);
                         std::cout << "El mensaje encriptado es: " << std::endl;
                         std::cout << matriz->getMessage() << std::endl;
                         break;
                     default:
                         std::cout << "Cifrado por columnas usando como llave a: " << value << "." << std::endl;
-                        matriz = new mat::Matrix<char>(mensaje, value);
+                        matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::crypt);
                         std::cout << matriz << std::endl;
-                        std::cout << "El mensaje encriptado es: " << std::endl;
                         mat::Matrix<char>::transpose(*matriz);
+                        std::cout << "El mensaje encriptado es: " << std::endl;
                         std::cout << matriz->getMessage() << std::endl;
                         break;
                     }
@@ -104,14 +104,27 @@ int main(int argc, char* argv[]){
                     switch (getsubopt(&subopts, decrypt_opts, &value))
                     {
                     case NO_KEY_OPTION:
-                        
-                    default:
-                        printf("Descifrado por columnas:\n");
+                        printf("Descifrado de mensaje:\n");
                         matriz = new mat::Matrix<char>(mensaje);
                         std::cout << matriz << std::endl;
                         std::cout << "El mensaje desencriptado es: " << std::endl;
                         mat::Matrix<char>::transpose(*matriz);
                         res = matriz->getMessage();
+                        for (size_t i = 0; i < res.length(); i++)
+                        {
+                            res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
+				        	+ ((res[i] == '&')*32)
+                            + ((res[i] == '@')*32);
+                        }
+                        trim(res);
+                        std::cout << res << std::endl;
+                        break;
+                    default:
+                        std::cout << "Descifrado usando como llave a: " << value << "." << std::endl;
+                        matriz = new mat::Matrix<char>(mensaje, value, mat::opcodes::decrypt);
+                        std::cout << matriz << std::endl;
+                        std::cout << "El mensaje desencriptado es: " << std::endl;
+                        res = matriz->getMessage(value);
                         for (size_t i = 0; i < res.length(); i++)
                         {
                             res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
