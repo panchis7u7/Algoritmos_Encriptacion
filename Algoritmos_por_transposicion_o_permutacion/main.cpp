@@ -31,6 +31,13 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function prototypes.
+
+void printCypher(mat::Matrix<char>*);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // trim from start.
 static inline std::string& ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -69,52 +76,27 @@ int main(int argc, char* argv[]){
                 message = optarg;
                 break;
 
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Row cypher with no key.
-
-            case 'r':
+            case 'r':   //Row cypher with no key.
                 options |= ROWS;
             break;
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Column cypher with no key.
-
-            case 'c':
+            case 'c':   //Column cypher with no key.
                 options |= COLUMNS;
             break;
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            
-            case 'n':
+            case 'n':   //User defined row/columns.  
                 n = std::stoi(optarg);
                 options |= NUM_ROW_COLS;
             break;
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Key cypher.
-
-            case 'k':
+            case 'k':   //Key options.
                 key = optarg;
                 options |= KEY;
             break;
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            // Decypher.
-
-            case 'd':
+            case 'd':   //Decryption options.
                 options |= DECYPHER;
             break;
-
-            ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            case ':':
+            case ':':   //No supported options.
                 std::cout << KRED << "Opcion no soportada." << std::endl;
                 break;
-            case '?':
+            case '?':   //Unknown options.
                 std::cout << KRED << "Opcion Desconocida." << std::endl;
                 break;
         }
@@ -132,17 +114,12 @@ int main(int argc, char* argv[]){
     if(options & COLUMNS){
         std::cout << "Transposicion por Columnas." << std::endl;
         if(options & DECYPHER){
-            //std::cout << "Cols Num Cols Key Decipher" << std::endl;
             if(options == (COLS_NUM_COLS | DECYPHER)){
-                //std::cout << "Cols Num Cols" << std::endl;
                 result = new mat::Matrix<char>(message, n, mat::strategy::reverse);
-                //mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | COLUMNS | DECYPHER)){
-                //std::cout << "Cols Key" << std::endl;
                 result = new mat::Matrix<char>(message, key, mat::strategy::keyDecrypt);
                 std::cout << result << std::endl;
                 std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
-                //mat::Matrix<char>::transpose(*result);
                 res = result->getMessage(key);
                 for (size_t i = 0; i < res.length(); i++)
                 {
@@ -155,28 +132,10 @@ int main(int argc, char* argv[]){
                 goto exit;
                 
             } else {
-                //std::cout << "Cols" << std::endl;
                 result = new mat::Matrix<char>(message);
             }
 
-
-            ////////////////////////////////////////////////////////////////////////
-            // Descipher message.
-
-            std::cout << result << std::endl;
-            std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
-            mat::Matrix<char>::transpose(*result);
-            res = result->getMessage();
-            for (size_t i = 0; i < res.length(); i++)
-            {
-                res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
-				+ ((res[i] == '&')*32)
-                + ((res[i] == '@')*32);
-            }
-            trim(res);
-            std::cout << KYEL << res << std::endl;
-
-            ////////////////////////////////////////////////////////////////////////
+            printCypher(result);
 
         } else {
             if(options == COLS_NUM_COLS){
@@ -218,28 +177,11 @@ int main(int argc, char* argv[]){
                 std::cout << KYEL << res << std::endl;
                 goto exit;
 
-                } else {
-                    result = new mat::Matrix<char>(message);
-                }
-                //goto exit;
-            
-            ////////////////////////////////////////////////////////////////////////
-            // Descipher message.
-
-            std::cout << result << std::endl;
-            std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
-            mat::Matrix<char>::transpose(*result);
-            res = result->getMessage();
-            for (size_t i = 0; i < res.length(); i++)
-            {
-                res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
-				+ ((res[i] == '&')*32)
-                + ((res[i] == '@')*32);
+            } else {
+                result = new mat::Matrix<char>(message);
             }
-            trim(res);
-            std::cout << KYEL << res << std::endl;
 
-            ////////////////////////////////////////////////////////////////////////
+            printCypher(result);
 
         } else {
             if(options == ROWS_NUM_ROWS){
@@ -257,18 +199,25 @@ int main(int argc, char* argv[]){
             std::cout << KYEL << result->getMessage() << std::endl;
         }
     }
-    
-    
-
     exit:
     std::cout << KCYN << "\n-------------------------------------------------------------------------------------" << KCYN << std::endl;
-    //Ho&epmseo&Vslaa!leedarl@asnentu@&tg&eed@caoet&a@os&laar@m?d&&&t@
-
-
-    // ./matrix -t "Hola como estas"? -c 4 --nokey -> Matrix transposition by columns (4).
-    // ./matrix -t "Hola como estas"? -r 4 --nokey -> Matrix transposition by rows (4).
-    // ./matrix -t "Hola como estas"? -c 4 -k "Gatito" -> Matrix transposition by columns (4) with key.
-    // ./matrix -t "Hola como estas"? -r 4 -k "Gatito" -> Matrix transposition by rows (4) with key.
-
     return 0;
+}
+
+void printCypher(mat::Matrix<char>* matrix){
+    ////////////////////////////////////////////////////////////////////////
+    // Descipher message
+    std::cout << matrix << std::endl;
+    std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
+    mat::Matrix<char>::transpose(*matrix);
+    std::string res = matrix->getMessage();
+    for (size_t i = 0; i < res.length(); i++)
+    {
+        res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
+		+ ((res[i] == '&')*32)
+        + ((res[i] == '@')*32);
+    }
+    trim(res);
+    std::cout << KYEL << res << std::endl;
+    ////////////////////////////////////////////////////////////////////////
 }
