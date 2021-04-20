@@ -102,40 +102,64 @@ namespace mat {
 	//Create matrix cypher with key.
 
 	template <class T>
-	Matrix<T>::Matrix(std::string message, std::string key){
-		std::replace(key.begin(), key.end(), ' ', '&');
-		this->columns = key.length(); 
-		this->rows = (ceil((message.length()/this->columns) + 1) + 1);
-		int padding = ((this->rows * this->columns) - (this->columns + message.length()));
-		padding = std::abs(padding);
-
-		for(size_t i = 0; i < padding; ++i){
-			message += "@";
-		}
-
-		this->data = Matrix<T>::alloc(this->rows, this->columns);
+	Matrix<T>::Matrix(std::string message, std::string key, strategy strategy){
 		int index = 0;
-		strncpy(this->data[0], key.c_str(), key.length());
-		for (size_t i = 1; i < this->rows; i++)
-		{
-			for (size_t j = 0; j < this->columns; j++)
-			{
-				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
-					+ ((message[index] == ' ')*38);
-				index++;
-			}
-		}	
+		int padding = 0;
+		switch(strategy){
+			case strategy::keyCrypt:
+				std::replace(key.begin(), key.end(), ' ', '&');
+				this->columns = key.length(); 
+				this->rows = (ceil((message.length()/this->columns) + 1) + 1);
+				padding = ((this->rows * this->columns) - (this->columns + message.length()));
+				padding = std::abs(padding);
 
-		Matrix<T>::transpose(*this);
-		//Order alphabetically using linear O(n) bubble sort.
-		for(int i = 0; i < this->rows-1; i++){
-			if((int)this->data[i][0] > (int)this->data[i+1][0]){
-				std::swap(this->data[i], this->data[i+1]);
-				i = 0;
-			}
+				for(size_t i = 0; i < padding; ++i){
+					message += "@";
+				}
+
+				this->data = Matrix<T>::alloc(this->rows, this->columns);
+				index = 0;
+				strncpy(this->data[0], key.c_str(), key.length());
+				for (size_t i = 1; i < this->rows; i++)
+				{
+					for (size_t j = 0; j < this->columns; j++)
+					{
+						this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+							+ ((message[index] == ' ')*38);
+						index++;
+					}
+				}	
+
+				Matrix<T>::transpose(*this);
+				//Order alphabetically using linear O(n) bubble sort.
+				for(int i = 0; i < this->rows-1; i++){
+					if((int)this->data[i][0] > (int)this->data[i+1][0]){
+						std::swap(this->data[i], this->data[i+1]);
+						i = 0;
+					}
+				}
+				Matrix<T>::transpose(*this);
+			break;
+			case strategy::keyDecrypt:
+				this->rows = key.length();;
+				this->columns = (ceil((message.length()/rows)));	
+				this->data = Matrix<T>::alloc(rows, columns);
+	
+				index = 0;
+	
+				for (size_t i = 0; i < this->rows; i++)
+	    		{
+					for (size_t j = 0; j < this->columns; j++)
+					{
+						this->data[i][j] = message[index];
+						index++;
+					}
+	    		}
+			break;
+			default:
+			break;
+			return;
 		}
-		Matrix<T>::transpose(*this);
-		return;
 
 		/* -------------- Randomize the matrix method. ----------------
 		std::mt19937 rng(device());
