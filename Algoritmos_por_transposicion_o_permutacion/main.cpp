@@ -187,13 +187,10 @@ int main(int argc, char* argv[]){
             //std::cout << "Rows Num Rows Key Decipher" << std::endl;
             if(options == (ROWS_NUM_ROWS | DECYPHER)){
                 result = new mat::Matrix<char>(message, n, mat::strategy::reverse);
-                mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | ROWS | DECYPHER)){
                 result = new mat::Matrix<char>(message, key);
-                mat::Matrix<char>::transpose(*result);
             } else {
                 result = new mat::Matrix<char>(message);
-                mat::Matrix<char>::transpose(*result);
             }
             
             ////////////////////////////////////////////////////////////////////////
