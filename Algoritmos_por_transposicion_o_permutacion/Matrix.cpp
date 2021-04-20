@@ -47,7 +47,7 @@ namespace mat {
 	template <class T>
 	Matrix<T>::Matrix(std::string message, unsigned n){
 		this->columns = n;
-		this->rows = ceil(message.length()/sqrt(n));
+		this->rows = ceil((message.length()) / n) + 1;
 		int padding = this->rows * this->columns;
 
 		for(size_t i = 0; i < padding; ++i){
@@ -74,8 +74,8 @@ namespace mat {
 	template <class T>
 	Matrix<T>::Matrix(std::string message, std::string key){
 		std::replace(key.begin(), key.end(), ' ', '&');
-		this->columns = key.length();
-		this->rows = (floor((message.length()/sqrt(this->columns))) + 1);
+		this->columns = key.length(); 
+		this->rows = (ceil((message.length()/this->columns) + 1) + 1);
 		int padding = ((this->rows * this->columns) - (this->columns + message.length()));
 		padding = std::abs(padding);
 
