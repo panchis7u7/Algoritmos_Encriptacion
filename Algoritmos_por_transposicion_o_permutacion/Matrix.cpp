@@ -45,27 +45,57 @@ namespace mat {
 	//Create matrix cypher without key but with user defined dimensions.
 
 	template <class T>
-	Matrix<T>::Matrix(std::string message, unsigned n){
-		this->columns = n;
-		this->rows = ceil((message.length()) / n) + 1;
-		int padding = this->rows * this->columns;
-
-		for(size_t i = 0; i < padding; ++i){
-			message += "@";
-		}
-		
-		this->data = alloc(this->rows, this->columns);
-
+	Matrix<T>::Matrix(std::string message, unsigned n, strategy strategy){
+		int padding = 0;
 		int index = 0;
-		for (size_t i = 0; i < this->rows; i++)
-	    {
-			for (size_t j = 0; j < this->columns; j++)
-			{
-				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
-					+ ((message[index] == ' ')*38);
-				index++;
-			}
-	    }
+
+		switch(strategy){
+			case strategy::normal:
+				this->columns = n;
+				this->rows = ceil((message.length()) / n) + 1;
+				padding = this->rows * this->columns;
+
+				for(size_t i = 0; i < padding; ++i){
+					message += "@";
+				}
+
+				this->data = alloc(this->rows, this->columns);
+
+				index = 0;
+				for (size_t i = 0; i < this->rows; i++)
+	    		{
+					for (size_t j = 0; j < this->columns; j++)
+					{
+						this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+							+ ((message[index] == ' ')*38);
+						index++;
+					}
+	    		}
+			break;
+
+			case strategy::reverse:
+				this->rows = n;
+				this->columns = ceil((message.length()) / n);
+				padding = this->rows * this->columns;
+
+				for(size_t i = 0; i < padding; ++i){
+					message += "@";
+				}
+
+				this->data = alloc(this->rows, this->columns);
+
+				index = 0;
+				for (size_t i = 0; i < this->rows; i++)
+	    		{
+					for (size_t j = 0; j < this->columns; j++)
+					{
+						this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+							+ ((message[index] == ' ')*38);
+						index++;
+					}
+	    		}
+			break;
+		}
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////

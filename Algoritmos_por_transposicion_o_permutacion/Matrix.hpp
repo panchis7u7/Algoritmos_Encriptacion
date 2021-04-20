@@ -6,14 +6,8 @@
 namespace mat {
 
     enum strategy {
-        rowtrans = 0,
-        coltrans
-    };
-
-    enum type {
         normal = 0,
-        nNormal,
-        key
+        reverse
     };
 
     template <class T>
@@ -21,7 +15,7 @@ namespace mat {
     public:
         Matrix(int rows, int columns);
         Matrix(std::string message);
-        Matrix(std::string message, unsigned n);
+        Matrix(std::string message, unsigned n, strategy strategy);
         Matrix(std::string message, std::string key);
         Matrix(const Matrix& mat) {this->data = mat.data;};
         Matrix(const Matrix* mat) {this->data = mat->data;};

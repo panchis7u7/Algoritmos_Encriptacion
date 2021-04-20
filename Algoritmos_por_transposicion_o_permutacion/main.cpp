@@ -135,24 +135,47 @@ int main(int argc, char* argv[]){
             //std::cout << "Cols Num Cols Key Decipher" << std::endl;
             if(options == (COLS_NUM_COLS | DECYPHER)){
                 //std::cout << "Cols Num Cols" << std::endl;
+                result = new mat::Matrix<char>(message, n, mat::strategy::reverse);
+                //mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | COLUMNS | DECYPHER)){
                 //std::cout << "Cols Key" << std::endl;
+                result = new mat::Matrix<char>(message, key);
             } else {
                 //std::cout << "Cols" << std::endl;
+                result = new mat::Matrix<char>(message);
             }
+
+            ////////////////////////////////////////////////////////////////////////
+            // Descipher message.
+
+            std::cout << result << std::endl;
+            std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
+            mat::Matrix<char>::transpose(*result);
+            res = result->getMessage();
+            for (size_t i = 0; i < res.length(); i++)
+            {
+                res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
+				+ ((res[i] == '&')*32)
+                + ((res[i] == '@')*32);
+            }
+            trim(res);
+            std::cout << KYEL << res << std::endl;
+
+            ////////////////////////////////////////////////////////////////////////
+
         } else {
             if(options == COLS_NUM_COLS){
-                result = new mat::Matrix<char>(message, n);
+                result = new mat::Matrix<char>(message, n, mat::strategy::normal);
             } else if(options == (KEY | COLUMNS)){
                 result = new mat::Matrix<char>(message, key);
             } else {
                 result = new mat::Matrix<char>(message);
             }
+            std::cout << result << std::endl;
+            mat::Matrix<char>::transpose(*result);
+            std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+            std::cout << KYEL << result->getMessage() << std::endl;
         }
-        std::cout << result << std::endl;
-        mat::Matrix<char>::transpose(*result);
-        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-        std::cout << KYEL << result->getMessage() << std::endl;
     }
 
 
@@ -163,15 +186,37 @@ int main(int argc, char* argv[]){
         if(options & DECYPHER){
             //std::cout << "Rows Num Rows Key Decipher" << std::endl;
             if(options == (ROWS_NUM_ROWS | DECYPHER)){
-                //std::cout << "Cols Num Cols" << std::endl;
+                result = new mat::Matrix<char>(message, n, mat::strategy::reverse);
+                mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | ROWS | DECYPHER)){
-                //std::cout << "Cols Key" << std::endl;
+                result = new mat::Matrix<char>(message, key);
+                mat::Matrix<char>::transpose(*result);
             } else {
-                //std::cout << "Cols" << std::endl;
+                result = new mat::Matrix<char>(message);
+                mat::Matrix<char>::transpose(*result);
             }
+            
+            ////////////////////////////////////////////////////////////////////////
+            // Descipher message.
+
+            std::cout << result << std::endl;
+            std::cout << KWHT << "El mensaje desencriptado es:" << std::endl;
+            mat::Matrix<char>::transpose(*result);
+            res = result->getMessage();
+            for (size_t i = 0; i < res.length(); i++)
+            {
+                res[i] = ((!(res[i] == '&')* !(res[i] == '@') *(int)res[i]))
+				+ ((res[i] == '&')*32)
+                + ((res[i] == '@')*32);
+            }
+            trim(res);
+            std::cout << KYEL << res << std::endl;
+
+            ////////////////////////////////////////////////////////////////////////
+
         } else {
             if(options == ROWS_NUM_ROWS){
-                result = new mat::Matrix<char>(message, n);
+                result = new mat::Matrix<char>(message, n, mat::strategy::normal);
                 mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | ROWS)){
                 result = new mat::Matrix<char>(message, key);
@@ -180,10 +225,10 @@ int main(int argc, char* argv[]){
                 result = new mat::Matrix<char>(message);
                 mat::Matrix<char>::transpose(*result);
             }
+            std::cout << result << std::endl;
+            std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+            std::cout << KYEL << result->getMessage() << std::endl;
         }
-        std::cout << result << std::endl;
-        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-        std::cout << KYEL << result->getMessage() << std::endl;
     }
     
     
