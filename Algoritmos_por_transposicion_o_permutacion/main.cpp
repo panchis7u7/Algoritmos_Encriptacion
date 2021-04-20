@@ -30,6 +30,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function prototypes.
+
+mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type);
+mat::Matrix<char>* decypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // trim from start.
 static inline std::string& ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -220,4 +228,37 @@ int main(int argc, char* argv[]){
     // ./matrix -t "Hola como estas"? -r 4 -k "Gatito" -> Matrix transposition by rows (4) with key.
 
     return 0;
+}
+
+mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
+    mat::Matrix<char>* cypher;
+    switch (strategy) {
+        
+    case mat::strategy::coltrans:
+        switch (type) {
+        case mat::type::nKey:
+            
+            break;
+        case mat::type::key:
+
+            break;
+        case mat::type::normal:
+
+            break;
+        default:
+
+            break;
+        }
+        break;
+
+    case mat::strategy::rowtrans:
+
+        break;
+    default:
+        break;
+    }
+}
+
+mat::Matrix<char>* decypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
+
 }

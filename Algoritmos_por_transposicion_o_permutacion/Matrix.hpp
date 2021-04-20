@@ -5,9 +5,15 @@
 
 namespace mat {
 
-    enum opcodes {
-        crypt = 0,
-        decrypt = 1
+    enum strategy {
+        rowtrans = 0,
+        coltrans
+    };
+
+    enum type {
+        nKey = 0,
+        key, 
+        normal
     };
 
     template <class T>
@@ -15,7 +21,9 @@ namespace mat {
     public:
         Matrix(int rows, int columns);
         Matrix(std::string message);
-        Matrix(std::string message, std::string key, opcodes opcode);
+        Matrix(std::string message, unsigned n);
+        Matrix(std::string message, std::string key);
+        Matrix(std::string message, std::string key, unsigned n);
         Matrix(const Matrix& mat) {this->data = mat.data;};
         Matrix(const Matrix* mat) {this->data = mat->data;};
         virtual ~Matrix();
