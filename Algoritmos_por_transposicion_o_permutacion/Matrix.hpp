@@ -11,9 +11,9 @@ namespace mat {
     };
 
     enum type {
-        nKey = 0,
-        key, 
-        normal
+        normal = 0,
+        nNormal,
+        key
     };
 
     template <class T>

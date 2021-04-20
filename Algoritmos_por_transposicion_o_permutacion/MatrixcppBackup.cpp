@@ -45,7 +45,7 @@ namespace mat {
 	//Create matrix cypher with key.
 
 	template <class T>
-	Matrix<T>::Matrix(std::string message, std::string key, opcodes opcode){
+	Matrix<T>::Matrix(std::string message, std::string key){
 		if(opcode == opcodes::crypt){
 			//srand(time(0));
 			std::replace(key.begin(), key.end(), ' ', '&');

@@ -42,89 +42,127 @@ namespace mat {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////////////////
+	//Create matrix cypher without key but with user defined dimensions.
+
+	template <class T>
+	Matrix<T>::Matrix(std::string message, unsigned n){
+		this->columns = n;
+		this->rows = ceil(message.length()/sqrt(n));
+		int padding = this->rows * this->columns;
+
+		for(size_t i = 0; i < padding; ++i){
+			message += "@";
+		}
+		
+		this->data = alloc(this->rows, this->columns);
+
+		int index = 0;
+		for (size_t i = 0; i < this->rows; i++)
+	    {
+			for (size_t j = 0; j < this->columns; j++)
+			{
+				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+					+ ((message[index] == ' ')*38);
+				index++;
+			}
+	    }
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
 	//Create matrix cypher with key.
 
 	template <class T>
-	Matrix<T>::Matrix(std::string message, std::string key, opcodes opcode){
-		if(opcode == opcodes::crypt){
-			//srand(time(0));
-			std::replace(key.begin(), key.end(), ' ', '&');
-			float columns = key.length();
-			float rows = (ceil((message.length()/columns)) + 1);
-			int padding = ((rows * columns) - (columns + message.length()));
-			for(size_t i = 0; i < padding; ++i){
-				message += "@";
-			}
+	Matrix<T>::Matrix(std::string message, std::string key){
+		std::replace(key.begin(), key.end(), ' ', '&');
+		this->columns = key.length();
+		this->rows = (floor((message.length()/sqrt(this->columns))) + 1);
+		int padding = ((this->rows * this->columns) - (this->columns + message.length()));
+		padding = std::abs(padding);
 
-			this->rows = rows;
-			this->columns = columns;	
-			this->data = Matrix<T>::alloc(rows, columns);
-
-			int index = 0;
-
-			strncpy(this->data[0], key.c_str(), key.length());
-
-			for (size_t i = 1; i < this->rows; i++)
-	    	{
-				for (size_t j = 0; j < this->columns; j++)
-				{
-					this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
-						+ ((message[index] == ' ')*38);
-					index++;
-				}
-	    	}	
-
-			Matrix<T>::transpose(*this);
-
-			//Order alphabetically using linear O(n) bubble sort.
-			for(int i = 0; i < this->rows-1; i++){
-				if((int)this->data[i][0] > (int)this->data[i+1][0]){
-					std::swap(this->data[i], this->data[i+1]);
-					i = 0;
-				}
-			}
-
-			Matrix<T>::transpose(*this);
-			return;
-
-		} else if (opcode == opcodes::decrypt){
-			unsigned int rows = key.length();
-			unsigned int columns = (ceil((message.length()/rows)));
-
-			this->rows = rows;
-			this->columns = columns;	
-			this->data = Matrix<T>::alloc(rows, columns);
-
-			int index = 0;
-
-			for (size_t i = 0; i < this->rows; i++)
-	    	{
-				for (size_t j = 0; j < this->columns; j++)
-				{
-					this->data[i][j] = message[index];
-					index++;
-				}
-	    	}
-			
-			return;
-
-		} else {
-			/* -------------- Randomize the matrix method. ----------------
-
-			std::mt19937 rng(device());
-			Uniform random numbers.
-			std::uniform_int_distribution<int> gen(0, this->rows-1);
-			unsigned int r;
-
-			//Fisher–Yates algorithm.
-			for (int i = this->rows-1; i != 0; i--) {
-				//r = gen(rng); 
-    			std::swap(this->data[i], this->data[r]); 
-    		} 
-
-			------------------------------------------------------------*/
-			return;
+		for(size_t i = 0; i < padding; ++i){
+			message += "@";
 		}
+
+		this->data = Matrix<T>::alloc(this->rows, this->columns);
+		int index = 0;
+		strncpy(this->data[0], key.c_str(), key.length());
+		for (size_t i = 1; i < this->rows; i++)
+		{
+			for (size_t j = 0; j < this->columns; j++)
+			{
+				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+					+ ((message[index] == ' ')*38);
+				index++;
+			}
+		}	
+
+		Matrix<T>::transpose(*this);
+		//Order alphabetically using linear O(n) bubble sort.
+		for(int i = 0; i < this->rows-1; i++){
+			if((int)this->data[i][0] > (int)this->data[i+1][0]){
+				std::swap(this->data[i], this->data[i+1]);
+				i = 0;
+			}
+		}
+		Matrix<T>::transpose(*this);
+		return;
+
+		/* -------------- Randomize the matrix method. ----------------
+		std::mt19937 rng(device());
+		Uniform random numbers.
+		std::uniform_int_distribution<int> gen(0, this->rows-1);
+		unsigned int r;
+		//Fisher–Yates algorithm.
+		for (int i = this->rows-1; i != 0; i--) {
+			//r = gen(rng); 
+    		std::swap(this->data[i], this->data[r]); 
+    	} 
+		------------------------------------------------------------*/
+	}
+
+	////////////////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Create matrix cypher with key and custom dimensions.
+
+	template <class T>
+	Matrix<T>::Matrix(std::string message, std::string key, unsigned n){
+		std::replace(key.begin(), key.end(), ' ', '&');
+		this->columns = key.length();
+		unsigned rows = (ceil((message.length()/this->columns)) + 1);
+		if(n < rows){
+			std::cout << "\x1B[31m" << "Ingreso una cantidad de filas que haria que se cortara el mensaje!" << std::endl;
+			this->rows = rows; 
+		} else this->rows = n;
+
+		int padding = ((this->rows * this->columns) - (this->columns + message.length()));
+
+		for(size_t i = 0; i < padding; ++i){
+			message += "@";
+		}
+
+		this->data = Matrix<T>::alloc(this->rows, this->columns);
+		int index = 0;
+		strncpy(this->data[0], key.c_str(), key.length());
+		for (size_t i = 1; i < this->rows; i++)
+		{
+			for (size_t j = 0; j < this->columns; j++)
+			{
+				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
+					+ ((message[index] == ' ')*38);
+				index++;
+			}
+		}	
+		Matrix<T>::transpose(*this);
+		//Order alphabetically using linear O(n) bubble sort.
+		for(int i = 0; i < this->rows-1; i++){
+			if((int)this->data[i][0] > (int)this->data[i+1][0]){
+				std::swap(this->data[i], this->data[i+1]);
+				i = 0;
+			}
+		}
+		Matrix<T>::transpose(*this);
+		return;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////

@@ -5,6 +5,7 @@
 #include <functional> 
 #include <cctype>
 #include <locale>
+#include <string>
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -57,41 +58,29 @@ static inline std::string& trim(std::string& s) {
     return ltrim(rtrim(s));
 }
 
-enum {
-  NO_KEY_OPTION = 0
-};
-
-char noKeyOption[] = "--nokey";
-
-char* decrypt_opts[] = {
-  noKeyOption
-};
-
 int main(int argc, char* argv[]){
-    char* subopts, *value;
     int opt;
 
     std::cout << KCYN << "-------------------------------------------------------------------------------------\n" << std::endl;
     std::cout << KYEL << "\t\t\tAlgoritmos por transposicion o permutacion." << std::endl;
     std::cout << KRED << "\t\t\t    Carlos Sebastian Madrigal Rodriguez\n" << KWHT << std::endl;
-    std::string mensaje = "Ingrese su mensaje! con la opcion -t!";
+    std::string message = "Ingrese su mensaje! con la opcion -t!";
     std::string key = "";
     int n = 0;
     std::uint8_t options = 0;
-    mat::Matrix<char>* matriz;
+    mat::Matrix<char>* result;
     std::string res;
 
     while((opt = getopt(argc, argv, ":t:crn:dk:")) != -1){
         switch(opt){
             case 't':
-                mensaje = optarg;
+                message = optarg;
                 break;
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Row cypher with no key.
 
             case 'r':
-                subopts = optarg; 
                 options |= ROWS;
             break;
 
@@ -101,33 +90,22 @@ int main(int argc, char* argv[]){
             // Column cypher with no key.
 
             case 'c':
-                subopts = optarg;
                 options |= COLUMNS;
             break;
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             
             case 'n':
-                subopts = optarg;
+                n = std::stoi(optarg);
                 options |= NUM_ROW_COLS;
-
-                getsubopt(&subopts, decrypt_opts, &value);
-                if(*subopts != '\0'){
-                    n = (int)*value;
-                }
             break;
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // Key cypher.
 
             case 'k':
-                subopts = optarg;
+                key = optarg;
                 options |= KEY;
-
-                getsubopt(&subopts, decrypt_opts, &value);
-                if(*subopts != '\0'){
-                    key = value;
-                }
             break;
 
             ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +114,6 @@ int main(int argc, char* argv[]){
             // Decypher.
 
             case 'd':
-                subopts = optarg;
                 options |= DECYPHER;
             break;
 
@@ -161,51 +138,57 @@ int main(int argc, char* argv[]){
 
     //Column transposition.
     if(options & COLUMNS){
-        std::cout << "Columns" << std::endl;
+        std::cout << "Transposicion por Columnas." << std::endl;
         if(options & DECYPHER){
-            std::cout << "Cols Num Cols Key Decipher" << std::endl;
+            //std::cout << "Cols Num Cols Key Decipher" << std::endl;
             if(options == (NUM_COLS_KEY | DECYPHER)){
-                std::cout << "Cols Num Cols Key" << std::endl;
+                //std::cout << "Cols Num Cols Key" << std::endl;
             } else if(options == (COLS_NUM_COLS | DECYPHER)){
-                std::cout << "Cols Num Cols" << std::endl;
+                //std::cout << "Cols Num Cols" << std::endl;
             } else if(options == (KEY | DECYPHER)){
-                std::cout << "Cols Key" << std::endl;
+                //std::cout << "Cols Key" << std::endl;
             } else {
-                std::cout << "Cols" << std::endl;
+                //std::cout << "Cols" << std::endl;
             }
         } else {
-            std::cout << "Cols Num Cols Key Cipher" << std::endl;
-            if(options == NUM_COLS_KEY){
-                std::cout << "Cols Num Cols Key" << std::endl;
-            } else if(options == COLS_NUM_COLS){
-                std::cout << "Cols Num Cols" << std::endl;
-            } else if(options == KEY){
-                std::cout << "Cols Key" << std::endl;
+            //std::cout << "Cols Num Cols Key Cipher" << std::endl;
+            if(options == COLS_NUM_COLS){
+                //std::cout << "Cols Num Cols" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::nNormal);
+                std::cout << result << std::endl;
+            } else if(options == (KEY | COLUMNS)){
+                //std::cout << "Cols Key" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::key);
+                std::cout << result << std::endl;
             } else {
-                std::cout << "Cols" << std::endl;
+                //std::cout << "Cols" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::normal);
+                std::cout << result << std::endl;
             }
         }
     }
 
     //Row transposition.
     if(options & ROWS){
-        std::cout << "Columns" << std::endl;
+        std::cout << "Rows" << std::endl;
         if(options & DECYPHER){
-            std::cout << "Cols Num Cols Key Decipher" << std::endl;
-            if(options == (NUM_ROWS_KEY | DECYPHER)){
-                std::cout << "Cols Num Cols Key" << std::endl;
-            } else if(options == (ROWS_NUM_ROWS | DECYPHER)){
-                std::cout << "Cols Num Cols" << std::endl;
+            std::cout << "Rows Num Rows Key Decipher" << std::endl;
+            if(options == (ROWS_NUM_ROWS | DECYPHER)){
+                //std::cout << "Cols Num Cols" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::nNormal);
+                std::cout << result << std::endl;
             } else if(options == (KEY | DECYPHER)){
-                std::cout << "Cols Key" << std::endl;
+                //std::cout << "Cols Key" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::key);
+                std::cout << result << std::endl;
             } else {
-                std::cout << "Cols" << std::endl;
+                //std::cout << "Cols" << std::endl;
+                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::normal);
+                std::cout << result << std::endl;
             }
         } else {
             std::cout << "Cols Num Cols Key Cipher" << std::endl;
-            if(options == NUM_ROWS_KEY){
-                std::cout << "Cols Num Cols Key" << std::endl;
-            } else if(options == ROWS_NUM_ROWS){
+            if(options == ROWS_NUM_ROWS){
                 std::cout << "Cols Num Cols" << std::endl;
             } else if(options == KEY){
                 std::cout << "Cols Key" << std::endl;
@@ -233,20 +216,20 @@ int main(int argc, char* argv[]){
 mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
     mat::Matrix<char>* cypher;
     switch (strategy) {
-        
+
     case mat::strategy::coltrans:
         switch (type) {
-        case mat::type::nKey:
-            
+        case mat::type::normal:
+            cypher = new mat::Matrix<char>(message);
+            break;
+        case mat::type::nNormal:
+            cypher = new mat::Matrix<char>(message, n);
             break;
         case mat::type::key:
-
-            break;
-        case mat::type::normal:
-
+            cypher = new mat::Matrix<char>(message, key);
             break;
         default:
-
+            std::cout << KRED << "Error con los parametros!" << std::endl;
             break;
         }
         break;
@@ -257,8 +240,11 @@ mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat:
     default:
         break;
     }
+
+    return cypher;
 }
 
 mat::Matrix<char>* decypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
-
+    mat::Matrix<char>* decypher;
+    return decypher;
 }
