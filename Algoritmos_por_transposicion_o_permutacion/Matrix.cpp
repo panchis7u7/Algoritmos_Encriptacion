@@ -123,51 +123,6 @@ namespace mat {
 	////////////////////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////////////////////
-	//Create matrix cypher with key and custom dimensions.
-
-	template <class T>
-	Matrix<T>::Matrix(std::string message, std::string key, unsigned n){
-		std::replace(key.begin(), key.end(), ' ', '&');
-		this->columns = key.length();
-		unsigned rows = (ceil((message.length()/this->columns)) + 1);
-		if(n < rows){
-			std::cout << "\x1B[31m" << "Ingreso una cantidad de filas que haria que se cortara el mensaje!" << std::endl;
-			this->rows = rows; 
-		} else this->rows = n;
-
-		int padding = ((this->rows * this->columns) - (this->columns + message.length()));
-
-		for(size_t i = 0; i < padding; ++i){
-			message += "@";
-		}
-
-		this->data = Matrix<T>::alloc(this->rows, this->columns);
-		int index = 0;
-		strncpy(this->data[0], key.c_str(), key.length());
-		for (size_t i = 1; i < this->rows; i++)
-		{
-			for (size_t j = 0; j < this->columns; j++)
-			{
-				this->data[i][j] = ((!(message[index] == ' ')*(int)message[index]))
-					+ ((message[index] == ' ')*38);
-				index++;
-			}
-		}	
-		Matrix<T>::transpose(*this);
-		//Order alphabetically using linear O(n) bubble sort.
-		for(int i = 0; i < this->rows-1; i++){
-			if((int)this->data[i][0] > (int)this->data[i+1][0]){
-				std::swap(this->data[i], this->data[i+1]);
-				i = 0;
-			}
-		}
-		Matrix<T>::transpose(*this);
-		return;
-	}
-
-	////////////////////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////////////////////
 	//Matrix object destructor.
 
     template <class T>

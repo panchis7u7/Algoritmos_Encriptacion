@@ -141,11 +141,9 @@ int main(int argc, char* argv[]){
         std::cout << "Transposicion por Columnas." << std::endl;
         if(options & DECYPHER){
             //std::cout << "Cols Num Cols Key Decipher" << std::endl;
-            if(options == (NUM_COLS_KEY | DECYPHER)){
-                //std::cout << "Cols Num Cols Key" << std::endl;
-            } else if(options == (COLS_NUM_COLS | DECYPHER)){
+            if(options == (COLS_NUM_COLS | DECYPHER)){
                 //std::cout << "Cols Num Cols" << std::endl;
-            } else if(options == (KEY | DECYPHER)){
+            } else if(options == (KEY | COLUMNS | DECYPHER)){
                 //std::cout << "Cols Key" << std::endl;
             } else {
                 //std::cout << "Cols" << std::endl;
@@ -154,12 +152,21 @@ int main(int argc, char* argv[]){
             if(options == COLS_NUM_COLS){
                 result = cypher(message, key, n, mat::strategy::coltrans, mat::type::nNormal);
                 std::cout << result << std::endl;
+                mat::Matrix<char>::transpose(*result);
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             } else if(options == (KEY | COLUMNS)){
                 result = cypher(message, key, n, mat::strategy::coltrans, mat::type::key);
                 std::cout << result << std::endl;
+                mat::Matrix<char>::transpose(*result);
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             } else {
                 result = cypher(message, key, n, mat::strategy::coltrans, mat::type::normal);
                 std::cout << result << std::endl;
+                mat::Matrix<char>::transpose(*result);
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             }
         }
     }
@@ -171,7 +178,7 @@ int main(int argc, char* argv[]){
             std::cout << "Rows Num Rows Key Decipher" << std::endl;
             if(options == (ROWS_NUM_ROWS | DECYPHER)){
                 //std::cout << "Cols Num Cols" << std::endl;
-            } else if(options == (KEY | DECYPHER)){
+            } else if(options == (KEY | ROWS | DECYPHER)){
                 //std::cout << "Cols Key" << std::endl;
             } else {
                 //std::cout << "Cols" << std::endl;
@@ -180,12 +187,18 @@ int main(int argc, char* argv[]){
             if(options == ROWS_NUM_ROWS){
                 result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::nNormal);
                 std::cout << result << std::endl;
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             } else if(options == (KEY | ROWS)){
                 result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::key);
                 std::cout << result << std::endl;
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             } else {
                 result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::normal);
                 std::cout << result << std::endl;
+                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+                std::cout << KYEL << result->getMessage() << std::endl;
             }
         }
     }

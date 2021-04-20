@@ -23,7 +23,6 @@ namespace mat {
         Matrix(std::string message);
         Matrix(std::string message, unsigned n);
         Matrix(std::string message, std::string key);
-        Matrix(std::string message, std::string key, unsigned n);
         Matrix(const Matrix& mat) {this->data = mat.data;};
         Matrix(const Matrix* mat) {this->data = mat->data;};
         virtual ~Matrix();
