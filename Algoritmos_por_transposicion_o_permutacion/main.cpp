@@ -31,14 +31,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Function prototypes.
-
-mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type);
-mat::Matrix<char>* decypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type);
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // trim from start.
 static inline std::string& ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
@@ -150,32 +142,26 @@ int main(int argc, char* argv[]){
             }
         } else {
             if(options == COLS_NUM_COLS){
-                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::nNormal);
-                std::cout << result << std::endl;
-                mat::Matrix<char>::transpose(*result);
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message, n);
             } else if(options == (KEY | COLUMNS)){
-                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::key);
-                std::cout << result << std::endl;
-                mat::Matrix<char>::transpose(*result);
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message, key);
             } else {
-                result = cypher(message, key, n, mat::strategy::coltrans, mat::type::normal);
-                std::cout << result << std::endl;
-                mat::Matrix<char>::transpose(*result);
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message);
             }
         }
+        std::cout << result << std::endl;
+        mat::Matrix<char>::transpose(*result);
+        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+        std::cout << KYEL << result->getMessage() << std::endl;
     }
+
+
 
     //Row transposition.
     if(options & ROWS){
-        std::cout << "Rows" << std::endl;
+        std::cout << "Transposicion por Filas." << std::endl;
         if(options & DECYPHER){
-            std::cout << "Rows Num Rows Key Decipher" << std::endl;
+            //std::cout << "Rows Num Rows Key Decipher" << std::endl;
             if(options == (ROWS_NUM_ROWS | DECYPHER)){
                 //std::cout << "Cols Num Cols" << std::endl;
             } else if(options == (KEY | ROWS | DECYPHER)){
@@ -185,22 +171,19 @@ int main(int argc, char* argv[]){
             }
         } else {
             if(options == ROWS_NUM_ROWS){
-                result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::nNormal);
-                std::cout << result << std::endl;
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message, n);
+                mat::Matrix<char>::transpose(*result);
             } else if(options == (KEY | ROWS)){
-                result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::key);
-                std::cout << result << std::endl;
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message, key);
+                mat::Matrix<char>::transpose(*result);
             } else {
-                result = cypher(message, key, n, mat::strategy::rowtrans, mat::type::normal);
-                std::cout << result << std::endl;
-                std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
-                std::cout << KYEL << result->getMessage() << std::endl;
+                result = new mat::Matrix<char>(message);
+                mat::Matrix<char>::transpose(*result);
             }
         }
+        std::cout << result << std::endl;
+        std::cout << KWHT << "El mensaje encriptado es: " << std::endl;
+        std::cout << KYEL << result->getMessage() << std::endl;
     }
     
     
@@ -216,57 +199,4 @@ int main(int argc, char* argv[]){
     // ./matrix -t "Hola como estas"? -r 4 -k "Gatito" -> Matrix transposition by rows (4) with key.
 
     return 0;
-}
-
-mat::Matrix<char>* cypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
-    mat::Matrix<char>* cypher;
-    switch (strategy) {
-
-    case mat::strategy::coltrans:
-        switch (type) {
-        case mat::type::normal:
-            cypher = new mat::Matrix<char>(message);
-            break;
-        case mat::type::nNormal:
-            cypher = new mat::Matrix<char>(message, n);
-            break;
-        case mat::type::key:
-            cypher = new mat::Matrix<char>(message, key);
-            break;
-        default:
-            std::cout << KRED << "Error con los parametros!" << std::endl;
-            break;
-        }
-        break;
-
-    case mat::strategy::rowtrans:
-        switch (type) {
-        case mat::type::normal:
-            cypher = new mat::Matrix<char>(message);
-            mat::Matrix<char>::transpose(*cypher);
-            break;
-        case mat::type::nNormal:
-            cypher = new mat::Matrix<char>(message, n);
-            mat::Matrix<char>::transpose(*cypher);
-            break;
-        case mat::type::key:
-            cypher = new mat::Matrix<char>(message, key);
-            mat::Matrix<char>::transpose(*cypher);
-            break;
-        default:
-            std::cout << KRED << "Error con los parametros!" << std::endl;
-            break;
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    return cypher;
-}
-
-mat::Matrix<char>* decypher(std::string message, std::string key, unsigned n, mat::strategy strategy, mat::type type){
-    mat::Matrix<char>* decypher;
-    return decypher;
 }
