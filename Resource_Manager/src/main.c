@@ -1,31 +1,30 @@
 #include <gtk-4.0/gtk/gtk.h>
+#include <glib-2.0/glib.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-static void print_hello (GtkWidget *widget, gpointer data) {
-    (void)widget;
-    (void)data;
-  g_print ("Hello World\n");
+static void on_window_main_destroy(GtkWindow* window){
+  gtk_window_close(window);
+  printf("Hola mundo!");
 }
 
 static void activate (GtkApplication *app, gpointer user_data) {
-    (void)app;
-    (void)user_data;
-    GtkWidget *window;
-    GtkWidget *button;
-    GtkWidget *box;
+  (void)user_data;
+  GtkWidget* window;
+  /*GtkWidget* menuBar;*/
 
-    window = gtk_application_window_new (app);
-    gtk_window_set_title (GTK_WINDOW (window), "Window");
-    gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+  GtkBuilder* builder = gtk_builder_new();
+  gtk_builder_add_from_file(builder, "glade/main.ui", NULL);
 
-    box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-    gtk_window_set_child (GTK_WINDOW (window), box);
+  window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
+  gtk_window_set_application(GTK_WINDOW(window),app);
+  g_signal_connect(window, "destroy", G_CALLBACK(on_window_main_destroy), NULL);
 
-    button = gtk_button_new_with_label ("Hello World");
-    g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-    g_signal_connect_swapped (button, "clicked", G_CALLBACK (gtk_window_destroy), window);
-    gtk_box_append (GTK_BOX (box), button);
-
-    gtk_widget_show (window);
+  /*menuBar = GTK_WIDGET(gtk_builder_get_object(builder, "menu_bar"));
+  gtk_application_set_menubar (GTK_APPLICATION(app), G_MENU_MODEL (menuBar));*/
+   /* Connect signal handlers to the constructed widgets. */
+  gtk_widget_show(GTK_WIDGET(window));
+  g_object_unref(builder);
 }
 
 int main (int argc, char* argv[]) {
