@@ -1,40 +1,9 @@
-#include <gtk-4.0/gtk/gtk.h>
-#include <glib-2.0/glib.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <gtk/gtk.h>
+#include "headers/mainapp.h"
 
-static void on_window_main_destroy(GtkWindow* window){
-  gtk_window_close(window);
-  printf("Hola mundo!");
-}
+int main(int argc, char* argv[]){
+    
+    g_setenv("GSETTINGS_SCHEMA_DIR", ".", FALSE);
 
-static void activate (GtkApplication *app, gpointer user_data) {
-  (void)user_data;
-  GtkWidget* window;
-  /*GtkWidget* menuBar;*/
-
-  GtkBuilder* builder = gtk_builder_new();
-  gtk_builder_add_from_file(builder, "glade/main.ui", NULL);
-
-  window = GTK_WIDGET(gtk_builder_get_object(builder, "window"));
-  gtk_window_set_application(GTK_WINDOW(window),app);
-  g_signal_connect(window, "destroy", G_CALLBACK(on_window_main_destroy), NULL);
-
-  /*menuBar = GTK_WIDGET(gtk_builder_get_object(builder, "menu_bar"));
-  gtk_application_set_menubar (GTK_APPLICATION(app), G_MENU_MODEL (menuBar));*/
-   /* Connect signal handlers to the constructed widgets. */
-  gtk_widget_show(GTK_WIDGET(window));
-  g_object_unref(builder);
-}
-
-int main (int argc, char* argv[]) {
-  GtkApplication *app;
-  int status;
-
-  app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
-  g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
-  status = g_application_run (G_APPLICATION (app), argc, argv);
-  g_object_unref (app);
-
-  return status;
+    return g_application_run(G_APPLICATION(main_app_new()), argc, argv);
 }
