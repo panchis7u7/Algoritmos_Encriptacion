@@ -8,22 +8,20 @@ SRC=src
 OBJ=obj
 BIN=bin
 SRCS=$(wildcard $(SRC)/*.c)
-#OBJS=$(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 BUILT_SRC = resources.c
 
-OBJS = $(OBJ)/$(BUILT_SRC:.c=.o) $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
-#OBJS = obj/mainApp.o obj/mainAppWindow.o obj/mainAppPreferences.o obj/main.o obj/resources.o
+OBJS = $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SRCS))
 
 all: mainapp
 
-org.gtk.mainapp.gschema.valid: schema/org.gtk.mainapp.gschema.xml
+org.gtk.mainapp.gschema.valid: org.gtk.mainapp.gschema.xml
 	$(GLIB_COMPILE_SCHEMAS) --strict --dry-run --schema-file=$< && mkdir -p $(@D)/ui && touch $@
 
 gschemas.compiled: org.gtk.mainapp.gschema.valid
 	$(GLIB_COMPILE_SCHEMAS) .
 
-resources.c: mainapp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=. --generate-dependencies mainapp.gresource.xml)
-	$(GLIB_COMPILE_RESOURCES) schema/mainapp.gresource.xml --target=src/$@ --sourcedir=. --generate-source
+$(SRC)/resources.c: mainapp.gresource.xml $(shell $(GLIB_COMPILE_RESOURCES) --sourcedir=. --generate-dependencies mainapp.gresource.xml)
+	$(GLIB_COMPILE_RESOURCES) mainapp.gresource.xml --target=$@ --sourcedir=. --generate-source
 
 $(OBJ)/%.o: $(SRC)/%.c
 	$(CC) -c -o $(OBJ)/$(@F) $(CFLAGS) $<

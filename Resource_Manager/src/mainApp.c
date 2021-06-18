@@ -19,7 +19,7 @@ struct _MainApp {
 G_DEFINE_TYPE(MainApp, main_app, GTK_TYPE_APPLICATION)
 
 MainApp* main_app_new(void) {
-    return g_object_new(MAIN_APP_TYPE, "applicatioon-id", "org.gtk.mainapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
+    return g_object_new(MAIN_APP_TYPE, "application-id", "org.gtk.mainapp", "flags", G_APPLICATION_HANDLES_OPEN, NULL);
 }
 
 static void main_app_init(MainApp* app){}
@@ -52,7 +52,7 @@ static void preferences_activated(GSimpleAction* action, GVariant* parameter, gp
   GtkWindow *window;
 
   window = gtk_application_get_active_window (GTK_APPLICATION (app));
-  preferences = example_app_prefs_new (EXAMPLE_APP_WINDOW (window));
+  preferences = main_app_preferences_new(MAIN_APP_WINDOW(window));
   gtk_window_present (GTK_WINDOW (preferences));
 }
 

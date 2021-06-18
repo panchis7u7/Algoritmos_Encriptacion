@@ -4,7 +4,7 @@
 #include <gtk/gtk.h>
 #include "../headers/mainAppWindow.h"
 
-#define MAIN_APP_PREFERENCES_TYPE (main_app_preferences_type ())
+#define MAIN_APP_PREFERENCES_TYPE (main_app_preferences_get_type ())
 G_DECLARE_FINAL_TYPE(MainAppPreferences, main_app_preferences, MAIN, APP_PREFERENCES, GtkDialog)
 
 MainAppPreferences* main_app_preferences_new(MainAppWindow* window);

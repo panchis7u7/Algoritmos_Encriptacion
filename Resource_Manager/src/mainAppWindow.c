@@ -9,7 +9,7 @@ static void main_app_window_init(MainAppWindow* window);
 static void find_word(GtkButton* button, MainAppWindow* window);
 static void update_words(MainAppWindow* window);
 static void update_lines(MainAppWindow* window);
-static void words_changed(GObject* sideBar, GParamSpec* pspec, MainAppWindow* window);
+static void words_changed(GObject* sidebar, GParamSpec* pspec, MainAppWindow* window);
 static void visible_child_changed(GObject* stack, GParamSpec* pspec, MainAppWindow* window);
 static void search_text_changed(GtkEntry* entry, MainAppWindow* window);
 
@@ -19,9 +19,9 @@ struct _MainAppWindow {
     GtkWidget* stack;
     GtkWidget* gears;
     GtkWidget* search;
-    GtkWidget* searchBar;
-    GtkWidget* searchEntry;
-    GtkWidget* sideBar;
+    GtkWidget* searchbar;
+    GtkWidget* searchentry;
+    GtkWidget* sidebar;
     GtkWidget* words;
     GtkWidget* lines;
     GtkWidget* lines_label;
@@ -35,15 +35,15 @@ MainAppWindow* main_app_window_new(MainApp* app){
 
 static void main_app_window_class_init(MainAppWindowClass* class){
   G_OBJECT_CLASS(class)->dispose = main_app_window_dispose;
-  gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/org/gtk/exampleapp/window.ui");
+  gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/org/gtk/mainapp/ui/window.ui");
 
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, stack);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, gears);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, search);
-  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, searchBar);
-  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, searchEntry);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, searchbar);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, searchentry);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, words);
-  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, sideBar);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, sidebar);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, lines);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, lines_label);
 
@@ -58,17 +58,17 @@ static void main_app_window_init(MainAppWindow* window){
 
   gtk_widget_init_template(GTK_WIDGET(window));
 
-  builder = gtk_builder_new_from_resource("/org/gtk/exampleapp/gears-menu.ui");
+  builder = gtk_builder_new_from_resource("/org/gtk/mainapp/ui/gears-menu.ui");
   menu = G_MENU_MODEL(gtk_builder_get_object(builder, "menu"));
   gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(window->gears), menu);
   g_object_unref(builder);
 
-  window->settings = g_settings_new("org.gtk.exampleapp");
+  window->settings = g_settings_new("org.gtk.mainapp");
 
   g_settings_bind(window->settings, "transition", window->stack, "transition-type", G_SETTINGS_BIND_DEFAULT);
-  g_settings_bind(window->settings, "show-words", window->sideBar, "reveal-child", G_SETTINGS_BIND_DEFAULT);
-  g_object_bind_property(window->search, "active", window->searchBar, "search-mode-enabled", G_BINDING_BIDIRECTIONAL);
-  g_signal_connect(window->sideBar, "notify::reveal-child", G_CALLBACK(words_changed), window);
+  g_settings_bind(window->settings, "show-words", window->sidebar, "reveal-child", G_SETTINGS_BIND_DEFAULT);
+  g_object_bind_property(window->search, "active", window->searchbar, "search-mode-enabled", G_BINDING_BIDIRECTIONAL);
+  g_signal_connect(window->sidebar, "notify::reveal-child", G_CALLBACK(words_changed), window);
 
   action = g_settings_create_action(window->settings, "show-words");
   g_action_map_add_action(G_ACTION_MAP(window), action);
@@ -136,7 +136,7 @@ static void main_app_window_dispose(GObject* object){
 static void find_word(GtkButton* button, MainAppWindow* window){
   const char* word;
   word = gtk_button_get_label(button);
-  gtk_editable_set_text(GTK_EDITABLE(window->searchEntry), word);
+  gtk_editable_set_text(GTK_EDITABLE(window->searchentry), word);
 }
 
 static void update_words(MainAppWindow* window){
@@ -210,7 +210,7 @@ static void update_lines(MainAppWindow* window){
   g_free (lines);
 }
 
-static void words_changed(GObject* sideBar, GParamSpec* pspec, MainAppWindow* window){
+static void words_changed(GObject* sidebar, GParamSpec* pspec, MainAppWindow* window){
   update_words(window);
 }
 
@@ -218,7 +218,7 @@ static void visible_child_changed(GObject* stack, GParamSpec* pspec, MainAppWind
   if (gtk_widget_in_destruction (GTK_WIDGET (stack)))
     return;
 
-  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR(window->searchBar), FALSE);
+  gtk_search_bar_set_search_mode (GTK_SEARCH_BAR(window->searchbar), FALSE);
   update_words (window);
   update_lines (window);
 }

@@ -3,6 +3,6 @@
   <gresource prefix="/org/gtk/mainapp">
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/gears-menu.ui</file>
-    <file preprocess="xml-stripblanks">ui/prefs.ui</file>
+    <file preprocess="xml-stripblanks">ui/preferences.ui</file>
   </gresource>
 </gresources>
