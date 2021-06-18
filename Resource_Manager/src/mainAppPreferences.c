@@ -1,8 +1,8 @@
 #include <gtk/gtk.h>
 
-#include "headers/mainApp.h"
-#include "headers/mainAppWindow.h"
-#include "headers/mainAppPreferences.h"
+#include "../headers/mainApp.h"
+#include "../headers/mainAppWindow.h"
+#include "../headers/mainAppPreferences.h"
 
 struct _MainAppPreferences {
   GtkDialog parent;

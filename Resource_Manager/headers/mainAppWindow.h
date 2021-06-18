@@ -2,7 +2,7 @@
 #define _MAIN_APP_WINDOW_H_
 
 #include <gtk/gtk.h>
-#include "headers/mainApp.h"
+#include "../headers/mainApp.h"
 
 #define MAIN_APP_WINDOW_TYPE (main_app_window_get_type ())
 G_DECLARE_FINAL_TYPE(MainAppWindow, main_app_window, MAIN, APP_WINDOW, GtkApplicationWindow)

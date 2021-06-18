@@ -1,5 +1,5 @@
 #include <gtk/gtk.h>
-#include "headers/mainapp.h"
+#include "../headers/mainApp.h"
 
 int main(int argc, char* argv[]){
     

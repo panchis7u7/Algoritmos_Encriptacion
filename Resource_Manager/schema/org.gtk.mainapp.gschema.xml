@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-  <schema path="/org/gtk/exampleapp/" id="org.gtk.mainApp">
+  <schema path="/org/gtk/mainapp/" id="org.gtk.mainapp">
     <key name="font" type="s">
       <default>'Monospace 12'</default>
       <summary>Font</summary>
