@@ -19,16 +19,32 @@
       </object>
     </child>
     <child>
-      <object class="GtkBox" id="content_box">
+      <object class="GtkBox">
+        <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkEntry" id="commandEntry">
-            <signal name="changed" handler="command_changed"/>
-          </object>
-        </child>
-        <child>
-          <object class="GtkButton" id="btnCommandSubmit">
-            <signal name="clicked" handler="command_submit_pressed"/>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkEntry" id="commandEntry">
+                <property name="hexpand">True</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="placeholder-text">Ingrese comando...</property>
+                <signal name="changed" handler="command_changed"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnCommandSubmit">
+                <property name="label" translatable="yes">Submit</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="hexpand">False</property>
+                <signal name="clicked" handler="command_submit_pressed"/>
+              </object>
+            </child>
           </object>
         </child>
       </object>
