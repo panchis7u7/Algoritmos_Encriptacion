@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <stdio.h>
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
@@ -6,12 +7,15 @@
 static void main_app_window_class_init(MainAppWindowClass* class);
 static void main_app_window_dispose(GObject* object);
 static void main_app_window_init(MainAppWindow* window);
+static void command_changed(GtkEntry* entry, MainAppWindow* window);
+static GtkTreeModel* create_completion_model(void);
 
 struct _MainAppWindow {
     GtkApplicationWindow parent;
     GSettings* settings;
     GtkWidget* title;
     GtkWidget* gears;
+    GtkWidget* commandEntry;
 };
 
 G_DEFINE_TYPE (MainAppWindow, main_app_window, GTK_TYPE_APPLICATION_WINDOW)
@@ -26,12 +30,17 @@ static void main_app_window_class_init(MainAppWindowClass* class){
 
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, title);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, gears);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, commandEntry);
+
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
 }
 
 static void main_app_window_init(MainAppWindow* window){
   GtkBuilder* builder;
   GMenuModel* menu;
   GAction* action;
+  GtkEntryCompletion* completion;
+  GtkTreeModel *completion_model;
 
   gtk_widget_init_template(GTK_WIDGET(window));
 
@@ -41,6 +50,23 @@ static void main_app_window_init(MainAppWindow* window){
   g_object_unref(builder);
 
   window->settings = g_settings_new("org.gtk.mainapp");
+
+  //Create completion object.
+  completion = gtk_entry_completion_new();
+
+  //Asign the completion to the entry.
+  gtk_entry_set_completion(GTK_ENTRY(window->commandEntry), completion);
+  g_object_unref(completion);
+
+  //Create a tree model and use it as the completion model.
+  completion_model = create_completion_model();
+  gtk_entry_completion_set_model(completion, completion_model);
+  g_object_unref(completion_model);
+  
+  /* Use model column 0 as the text column */
+  gtk_entry_completion_set_text_column (completion, 0);
+  gtk_entry_completion_set_inline_completion (completion, TRUE);
+  gtk_entry_completion_set_inline_selection (completion, TRUE);
 }
 
 void main_app_window_open(MainAppWindow* window, GFile* file){
@@ -87,4 +113,35 @@ static void main_app_window_dispose(GObject* object){
   window = MAIN_APP_WINDOW(object);
   g_clear_object(&window->settings);
   G_OBJECT_CLASS(main_app_window_parent_class)->dispose(object);
+}
+
+static void command_changed(GtkEntry* entry, MainAppWindow* window){
+  
+}
+
+static GtkTreeModel* create_completion_model(void){
+  const char* commands[] = {
+    "ls [dir]",
+    "ls -l [dir]",
+    "cat [file_path]",
+    "pwd",
+    "adduser [user_name]",
+    "deluser [user_name]",
+    NULL
+  };
+
+  int i;
+  GtkListStore *store;
+  GtkTreeIter iter;
+
+  store = gtk_list_store_new (1, G_TYPE_STRING);
+
+  for (i = 0; commands[i]; i++)
+    {
+      /* Append one word */
+      gtk_list_store_append (store, &iter);
+      gtk_list_store_set (store, &iter, 0, commands[i], -1);
+    }
+
+  return GTK_TREE_MODEL (store);
 }
