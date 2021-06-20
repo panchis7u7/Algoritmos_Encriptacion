@@ -26,6 +26,11 @@
             <signal name="changed" handler="command_changed"/>
           </object>
         </child>
+        <child>
+          <object class="GtkButton" id="btnCommandSubmit">
+            <signal name="clicked" handler="command_submit_pressed"/>
+          </object>
+        </child>
       </object>
     </child>
   </template>

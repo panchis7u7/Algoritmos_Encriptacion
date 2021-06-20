@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 #include <stdio.h>
 
 #include "../headers/mainApp.h"
@@ -8,7 +9,12 @@ static void main_app_window_class_init(MainAppWindowClass* class);
 static void main_app_window_dispose(GObject* object);
 static void main_app_window_init(MainAppWindow* window);
 static void command_changed(GtkEntry* entry, MainAppWindow* window);
+static void command_submit_pressed(GtkButton *button, gpointer user_data);
 static GtkTreeModel* create_completion_model(void);
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 struct _MainAppWindow {
     GtkApplicationWindow parent;
@@ -16,13 +22,22 @@ struct _MainAppWindow {
     GtkWidget* title;
     GtkWidget* gears;
     GtkWidget* commandEntry;
+    GtkWidget* btnCommandSubmit;
 };
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 G_DEFINE_TYPE (MainAppWindow, main_app_window, GTK_TYPE_APPLICATION_WINDOW)
 
 MainAppWindow* main_app_window_new(MainApp* app){
     return g_object_new(MAIN_APP_WINDOW_TYPE, "application", app, NULL);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 static void main_app_window_class_init(MainAppWindowClass* class){
   G_OBJECT_CLASS(class)->dispose = main_app_window_dispose;
@@ -31,9 +46,15 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, title);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, gears);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, commandEntry);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, btnCommandSubmit);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 static void main_app_window_init(MainAppWindow* window){
   GtkBuilder* builder;
@@ -68,6 +89,10 @@ static void main_app_window_init(MainAppWindow* window){
   gtk_entry_completion_set_inline_completion (completion, TRUE);
   gtk_entry_completion_set_inline_selection (completion, TRUE);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 void main_app_window_open(MainAppWindow* window, GFile* file){
   char *basename;
@@ -108,6 +133,10 @@ void main_app_window_open(MainAppWindow* window, GFile* file){
   g_free (basename);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 static void main_app_window_dispose(GObject* object){
   MainAppWindow* window;
   window = MAIN_APP_WINDOW(object);
@@ -115,9 +144,25 @@ static void main_app_window_dispose(GObject* object){
   G_OBJECT_CLASS(main_app_window_parent_class)->dispose(object);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 static void command_changed(GtkEntry* entry, MainAppWindow* window){
   
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+static void command_submit_pressed(GtkButton *button, gpointer user_data){
+  g_print("Hola");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 static GtkTreeModel* create_completion_model(void){
   const char* commands[] = {
@@ -145,3 +190,23 @@ static GtkTreeModel* create_completion_model(void){
 
   return GTK_TREE_MODEL (store);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+/* Layout:
+ 
+    +-------------------------------------+
+    | +-----------++-------++-----------+ |
+    | |  CmdEntry  || Space ||  Submit  | |
+    | +-----------++-------++-----------+ |
+    +-------------------------------------+
+ 
+  Constraints:
+ 
+    super.start = cmdEntry.start - 8
+    cmdEntry.end = space.start
+    space.end = Submit.start
+    submit.end = super.end - 8
+
+*/
+///////////////////////////////////////////////////////////////////////////////////////
