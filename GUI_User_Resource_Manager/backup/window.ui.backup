@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <object class="GListStore" id="viewlist">
-    <property name="item-type">FileBrowserView</property>
+    <property name="item-type">MainAppWindow</property>
     <child>
-      <object class="FileBrowserView">
+      <object class="MainAppWindow">
         <property name="factory">
           <object class="GtkBuilderListItemFactory">
             <property name="bytes"><![CDATA[
@@ -44,7 +44,7 @@
       </object>
     </child>
     <child>
-      <object class="FileBrowserView">
+      <object class="MainAppWindow">
         <property name="icon-name">view-grid-symbolic</property>
         <property name="title" translatable="yes">Grid</property>
         <property name="factory">
@@ -92,7 +92,7 @@
       </object>
     </child>
     <child>
-      <object class="FileBrowserView">
+      <object class="MainAppWindow">
         <property name="icon-name">view-paged-symbolic</property>
         <property name="title" translatable="yes">Paged</property>
         <property name="factory">
@@ -165,23 +165,21 @@
       </object>
     </child>
   </object>
-  <object class="GtkSingleSelection" id="selection_model">
-    <property name="model">
-      <object class="GtkDirectoryList" id="dirlist">
-        <property name="attributes">standard::name,standard::display-name,standard::icon,standard::size,standard::content-type</property>
-      </object>
-    </property>
-  </object>
-  <object class="GtkWindow" id="window">
-    <property name="title" translatable="yes">File browser</property>
+  <template class="MainAppWindow" parent="GtkApplicationWindow">
+    <property name="title" translatable="yes">User Resource Manager</property>
     <property name="default-width">600</property>
     <property name="default-height">400</property>
     <child type="titlebar">
-      <object class="GtkHeaderBar" id="">
+      <object class="GtkHeaderBar" id="header">
         <child>
           <object class="GtkButton">
             <property name="icon-name">go-up-symbolic</property>
-              <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/>
+            <!-- <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/> -->
+          </object>
+        </child>
+        <child type="start">
+          <object class="GtkMenuButton" id="gears">
+            <property name="direction">none</property>
           </object>
         </child>
         <child type="end">
@@ -194,7 +192,7 @@
             </style>
             <property name="model">
               <object class="GtkSingleSelection" id="selected-view">
-                <property name="model">viewlist</property>
+                <!--<property name="model">viewlist</property>-->
               </object>
             </property>
             <property name="factory">
@@ -206,12 +204,12 @@
                       <property name="child">
                         <object class="GtkImage">
                           <binding name="icon-name">
-                            <lookup type="FileBrowserView" name="icon-name">
+                            <lookup type="MainAppWindow" name="icon-name">
                               <lookup name="item">GtkListItem</lookup>
                             </lookup>
                           </binding>
                           <binding name="tooltip-text">
-                            <lookup type="FileBrowserView" name="title">
+                            <lookup type="MainAppWindow" name="file_title">
                               <lookup name="item">GtkListItem</lookup>
                             </lookup>
                           </binding>
@@ -227,26 +225,54 @@
       </object>
     </child>
     <child>
-      <object class="GtkScrolledWindow">
-        <property name="can-focus">1</property>
+      <object class="GtkBox" id="outerBox">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkGridView" id="view">
-            <property name="model">selection_model</property>
-            <property name="max-columns">15</property>
-            <binding name="factory">
-              <lookup name="factory" type="FileBrowserView">
-                <lookup name="selected-item">selected-view</lookup>
-              </lookup>
-            </binding>
-            <binding name="orientation">
-              <lookup name="orientation" type="FileBrowserView">
-                <lookup name="selected-item">selected-view</lookup>
-              </lookup>
-            </binding>
-            <!--<signal name="activate" handler="filebrowser_view_activated_cb" object="dirlist" swapped="no"/>-->
+          <object class="GtkBox" id="innerBox">
+            <property name="visible">True</property>
+            <property name="orientation">horizontal</property>
+            <child>
+              <object class="GtkEntry" id="commandEntry">
+                <property name="hexpand">True</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="placeholder-text">Ingrese comando...</property>
+                <signal name="changed" handler="command_changed"/>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="btnCommandSubmit">
+                <property name="label" translatable="yes">Submit</property>
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">True</property>
+                <property name="hexpand">False</property>
+                <signal name="clicked" handler="command_submit_pressed"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">Page 2</property>
+                <property name="child">
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">Page 2</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                  </object>
+                </property>
+              </object>
+            </child>
           </object>
         </child>
       </object>
     </child>
-  </object>
+  </template>
 </interface>

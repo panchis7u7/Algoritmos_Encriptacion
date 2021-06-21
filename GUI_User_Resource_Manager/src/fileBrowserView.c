@@ -44,7 +44,7 @@ G_DEFINE_TYPE (FileBrowserView, file_browser_view, G_TYPE_OBJECT)
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-FileBrowserView* file_browser_view_new(MainAppWindow* window){
+FileBrowserView* file_browser_view_new(GtkWindow* window){
     return g_object_new(FILE_BROWSER_TYPE, NULL, window, NULL);
 }
 
@@ -261,6 +261,8 @@ GtkWidget* do_listview_filebrowser (GtkWidget *do_widget) {
       GFile *file;
       char *cwd;
       GtkCssProvider *provider;
+
+      file_browser_view_new(GTK_WINDOW(do_widget));
 
       provider = gtk_css_provider_new ();
       gtk_css_provider_load_from_resource (provider, "/org/gtk/mainapp/css/fileBrowser.css");

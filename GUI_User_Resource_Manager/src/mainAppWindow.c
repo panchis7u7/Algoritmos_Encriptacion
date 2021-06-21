@@ -4,6 +4,7 @@
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
+#include "../headers/fileBrowserView.h"
 
 static void main_app_window_class_init(MainAppWindowClass* class);
 static void main_app_window_dispose(GObject* object);
@@ -19,7 +20,6 @@ static GtkTreeModel* create_completion_model(void);
 struct _MainAppWindow {
     GtkApplicationWindow parent;
     GSettings* settings;
-    GtkWidget* title;
     GtkWidget* gears;
     GtkWidget* commandEntry;
     GtkWidget* btnCommandSubmit;
@@ -41,10 +41,11 @@ MainAppWindow* main_app_window_new(MainApp* app){
 ///////////////////////////////////////////////////////////////////////////////////////
 
 static void main_app_window_class_init(MainAppWindowClass* class){
-  G_OBJECT_CLASS(class)->dispose = main_app_window_dispose;
+  GObjectClass* gobject_class = G_OBJECT_CLASS(class);
+  gobject_class->dispose = main_app_window_dispose;
+
   gtk_widget_class_set_template_from_resource(GTK_WIDGET_CLASS(class), "/org/gtk/mainapp/ui/window.ui");
 
-  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, title);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, gears);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, commandEntry);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, btnCommandSubmit);
@@ -164,6 +165,9 @@ static void command_changed(GtkEntry* entry, MainAppWindow* window){
 
 static void command_submit_pressed(GtkButton *button, gpointer user_data){
   g_print("Hola");
+  GtkWidget* window = gtk_window_new();
+  //FileBrowserView* browser = file_browser_view_new(GTK_WINDOW(window));
+  do_listview_filebrowser(window);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

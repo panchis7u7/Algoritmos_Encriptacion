@@ -35,8 +35,8 @@ static void main_app_open(GApplication* app, GFile** files, int n_files, const c
   else
     window = main_app_window_new(MAIN_APP(app));
   
-  for(i = 0; i < n_files; i++)
-    main_app_window_open(window, files[i]);
+  /*for(i = 0; i < n_files; i++)
+    main_app_window_open(window, files[i]);*/
 
    gtk_window_present(GTK_WINDOW(window));
 }

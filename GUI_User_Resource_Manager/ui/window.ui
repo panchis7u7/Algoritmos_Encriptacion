@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="MainAppWindow" parent="GtkApplicationWindow">
-    <property name="title" translatable="yes">Example Application</property>
+    <property name="title" translatable="yes">User Resource Manager</property>
     <property name="default-width">600</property>
     <property name="default-height">400</property>
     <child type="titlebar">
@@ -12,54 +12,9 @@
             <!-- <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/> -->
           </object>
         </child>
-        <child type="title">
-          <object class="GtkLabel" id="title">
-            <property name="label" translatable="yes">User Resource Manager</property>
-          </object>
-        </child>
         <child type="start">
           <object class="GtkMenuButton" id="gears">
             <property name="direction">none</property>
-          </object>
-        </child>
-        <child type="end">
-          <object class="GtkListView">
-            <property name="valign">center</property>
-            <property name="orientation">horizontal</property>
-            <style>
-              <class name="linked"/>
-              <class name="viewswitcher"/>
-            </style>
-            <property name="model">
-              <object class="GtkSingleSelection" id="selected-view">
-                <!--<property name="model">viewlist</property>-->
-              </object>
-            </property>
-            <property name="factory">
-              <object class="GtkBuilderListItemFactory">
-                <property name="bytes"><![CDATA[
-                  <?xml version="1.0" encoding="UTF-8"?>
-                  <interface>
-                    <template class="GtkListItem">
-                      <property name="child">
-                        <object class="GtkImage">
-                          <binding name="icon-name">
-                            <lookup type="FileBrowserView" name="icon-name">
-                              <lookup name="item">GtkListItem</lookup>
-                            </lookup>
-                          </binding>
-                          <binding name="tooltip-text">
-                            <lookup type="FileBrowserView" name="title">
-                              <lookup name="item">GtkListItem</lookup>
-                            </lookup>
-                          </binding>
-                        </object>
-                      </property>
-                    </template>
-                  </interface>
-                ]]></property>
-              </object>
-            </property>
           </object>
         </child>
       </object>
