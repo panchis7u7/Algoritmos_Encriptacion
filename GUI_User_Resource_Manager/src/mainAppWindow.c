@@ -23,6 +23,7 @@ struct _MainAppWindow {
     GtkWidget* gears;
     GtkWidget* commandEntry;
     GtkWidget* btnCommandSubmit;
+    GtkWidget* stack;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,7 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, gears);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, commandEntry);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, btnCommandSubmit);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, stack);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
@@ -62,12 +64,16 @@ static void main_app_window_init(MainAppWindow* window){
   GAction* action;
   GtkEntryCompletion* completion;
   GtkTreeModel *completion_model;
+  GtkBox* box;
 
   gtk_widget_init_template(GTK_WIDGET(window));
 
   builder = gtk_builder_new_from_resource("/org/gtk/mainapp/ui/gears-menu.ui");
   menu = G_MENU_MODEL(gtk_builder_get_object(builder, "menu"));
   gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(window->gears), menu);
+
+  window->stack = GTK_WIDGET(gtk_builder_get_object(builder, "stack"));
+
   g_object_unref(builder);
 
   window->settings = g_settings_new("org.gtk.mainapp");

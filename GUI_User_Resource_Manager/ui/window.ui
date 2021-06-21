@@ -6,24 +6,70 @@
     <property name="default-height">400</property>
     <child type="titlebar">
       <object class="GtkHeaderBar" id="header">
+        <child>
+          <object class="GtkButton">
+            <property name="icon-name">go-up-symbolic</property>
+            <!-- <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/> -->
+          </object>
+        </child>
         <child type="title">
           <object class="GtkLabel" id="title">
             <property name="label" translatable="yes">User Resource Manager</property>
           </object>
         </child>
-        <child type="end">
+        <child type="start">
           <object class="GtkMenuButton" id="gears">
             <property name="direction">none</property>
+          </object>
+        </child>
+        <child type="end">
+          <object class="GtkListView">
+            <property name="valign">center</property>
+            <property name="orientation">horizontal</property>
+            <style>
+              <class name="linked"/>
+              <class name="viewswitcher"/>
+            </style>
+            <property name="model">
+              <object class="GtkSingleSelection" id="selected-view">
+                <!--<property name="model">viewlist</property>-->
+              </object>
+            </property>
+            <property name="factory">
+              <object class="GtkBuilderListItemFactory">
+                <property name="bytes"><![CDATA[
+                  <?xml version="1.0" encoding="UTF-8"?>
+                  <interface>
+                    <template class="GtkListItem">
+                      <property name="child">
+                        <object class="GtkImage">
+                          <binding name="icon-name">
+                            <lookup type="FileBrowserView" name="icon-name">
+                              <lookup name="item">GtkListItem</lookup>
+                            </lookup>
+                          </binding>
+                          <binding name="tooltip-text">
+                            <lookup type="FileBrowserView" name="title">
+                              <lookup name="item">GtkListItem</lookup>
+                            </lookup>
+                          </binding>
+                        </object>
+                      </property>
+                    </template>
+                  </interface>
+                ]]></property>
+              </object>
+            </property>
           </object>
         </child>
       </object>
     </child>
     <child>
-      <object class="GtkBox">
+      <object class="GtkBox" id="outerBox">
         <property name="visible">True</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="innerBox">
             <property name="visible">True</property>
             <property name="orientation">horizontal</property>
             <child>
@@ -43,6 +89,25 @@
                 <property name="receives-default">True</property>
                 <property name="hexpand">False</property>
                 <signal name="clicked" handler="command_submit_pressed"/>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStack" id="stack">
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">Page 2</property>
+                <property name="child">
+                  <object class="GtkCheckButton">
+                    <property name="label" translatable="yes">Page 2</property>
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                  </object>
+                </property>
               </object>
             </child>
           </object>
