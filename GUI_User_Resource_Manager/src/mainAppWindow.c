@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <glib/gi18n.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
@@ -10,7 +11,7 @@ static void main_app_window_class_init(MainAppWindowClass* class);
 static void main_app_window_dispose(GObject* object);
 static void main_app_window_init(MainAppWindow* window);
 static void command_changed(GtkEntry* entry, MainAppWindow* window);
-static void command_submit_pressed(GtkButton *button, gpointer user_data);
+static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
 static GtkTreeModel* create_completion_model(void);
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -159,15 +160,36 @@ static void command_changed(GtkEntry* entry, MainAppWindow* window){
   
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-static void command_submit_pressed(GtkButton *button, gpointer user_data){
-  g_print("Hola");
-  GtkWidget* window = gtk_window_new();
-  //FileBrowserView* browser = file_browser_view_new(GTK_WINDOW(window));
-  do_listview_filebrowser(window);
+///////////////////////////////////////////////////////////////////////////////////////
+
+static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
+  GtkEntryBuffer* buffer = gtk_entry_get_buffer(GTK_ENTRY(window->commandEntry));
+  const char* text = gtk_entry_buffer_get_text(buffer);
+  char* substring = NULL;
+
+  if((substring = strstr(text, "ls -l")) != NULL){
+    g_print("%s", substring);
+    char* file = strtok((char*)text, "[");
+    g_print("%s", file);
+  } else if((substring = strstr(text, "ls")) != NULL){
+    g_print("%s", substring);
+  } else if ((substring = strstr(text, "cat")) != NULL){
+    g_print("%s", substring);
+  } else if ((substring = strstr(text, "pwd")) != NULL){
+    g_print("%s", substring);
+  } else if ((substring = strstr(text, "adduser")) != NULL){
+    g_print("%s", substring);
+  } else if ((substring = strstr(text, "deluser")) != NULL){
+    g_print("%s", substring);
+  } else {
+    g_print("Not found");
+  }
+
+  /*GtkWidget* win;
+  win = do_listview_filebrowser(GTK_WIDGET(window));*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////

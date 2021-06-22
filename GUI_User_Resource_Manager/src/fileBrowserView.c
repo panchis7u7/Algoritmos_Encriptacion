@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <glib/gi18n.h>
 
 #include "../headers/mainAppWindow.h"
 #include "../headers/fileBrowserView.h"
@@ -262,8 +263,7 @@ GtkWidget* do_listview_filebrowser (GtkWidget *do_widget) {
       char *cwd;
       GtkCssProvider *provider;
 
-      file_browser_view_new(GTK_WINDOW(do_widget));
-
+      file_browser_view_new(NULL);
       provider = gtk_css_provider_new ();
       gtk_css_provider_load_from_resource (provider, "/org/gtk/mainapp/css/fileBrowser.css");
       gtk_style_context_add_provider_for_display (gdk_display_get_default (),
@@ -273,6 +273,10 @@ GtkWidget* do_listview_filebrowser (GtkWidget *do_widget) {
 
       builder = gtk_builder_new_from_resource ("/org/gtk/mainapp/ui/file-browser.ui");
       window = GTK_WIDGET (gtk_builder_get_object (builder, "window"));
+      g_signal_connect(window, "clicked", G_CALLBACK(filebrowser_up_clicked_cb), NULL);
+      g_signal_connect(window, "activate", G_CALLBACK(filebrowser_view_activated_cb), NULL);
+
+
       gtk_window_set_display (GTK_WINDOW (window),
                               gtk_widget_get_display (do_widget));
       g_object_add_weak_pointer (G_OBJECT (window), (gpointer *) &window);

@@ -1,5 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <object class="GtkWindow" id="window">
+    <property name="title" translatable="yes">File browser</property>
+    <property name="default-width">600</property>
+    <property name="default-height">400</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="">
+        <child>
+          <object class="GtkButton">
+            <property name="icon-name">go-up-symbolic</property>
+              <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/>
+          </object>
+        </child>
+        <child type="end">
+          <object class="GtkListView">
+            <property name="valign">center</property>
+            <property name="orientation">horizontal</property>
+            <style>
+              <class name="linked"/>
+              <class name="viewswitcher"/>
+            </style>
+            <property name="model">
+              <object class="GtkSingleSelection" id="selected-view">
+                <property name="model">viewlist</property>
+              </object>
+            </property>
+            <property name="factory">
+              <object class="GtkBuilderListItemFactory">
+                <property name="bytes"><![CDATA[
+                  <?xml version="1.0" encoding="UTF-8"?>
+                  <interface>
+                    <template class="GtkListItem">
+                      <property name="child">
+                        <object class="GtkImage">
+                          <binding name="icon-name">
+                            <lookup type="FileBrowserView" name="icon-name">
+                              <lookup name="item">GtkListItem</lookup>
+                            </lookup>
+                          </binding>
+                          <binding name="tooltip-text">
+                            <lookup type="FileBrowserView" name="title">
+                              <lookup name="item">GtkListItem</lookup>
+                            </lookup>
+                          </binding>
+                        </object>
+                      </property>
+                    </template>
+                  </interface>
+                ]]></property>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="can-focus">1</property>
+        <child>
+          <object class="GtkGridView" id="view">
+            <property name="model">selection_model</property>
+            <property name="max-columns">15</property>
+            <binding name="factory">
+              <lookup name="factory" type="FileBrowserView">
+                <lookup name="selected-item">selected-view</lookup>
+              </lookup>
+            </binding>
+            <binding name="orientation">
+              <lookup name="orientation" type="FileBrowserView">
+                <lookup name="selected-item">selected-view</lookup>
+              </lookup>
+            </binding>
+            <signal name="activate" handler="filebrowser_view_activated_cb" object="dirlist" swapped="no"/>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GListStore" id="viewlist">
     <property name="item-type">FileBrowserView</property>
     <child>
@@ -171,82 +248,5 @@
         <property name="attributes">standard::name,standard::display-name,standard::icon,standard::size,standard::content-type</property>
       </object>
     </property>
-  </object>
-  <object class="GtkWindow" id="window">
-    <property name="title" translatable="yes">File browser</property>
-    <property name="default-width">600</property>
-    <property name="default-height">400</property>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="">
-        <child>
-          <object class="GtkButton">
-            <property name="icon-name">go-up-symbolic</property>
-              <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/>
-          </object>
-        </child>
-        <child type="end">
-          <object class="GtkListView">
-            <property name="valign">center</property>
-            <property name="orientation">horizontal</property>
-            <style>
-              <class name="linked"/>
-              <class name="viewswitcher"/>
-            </style>
-            <property name="model">
-              <object class="GtkSingleSelection" id="selected-view">
-                <property name="model">viewlist</property>
-              </object>
-            </property>
-            <property name="factory">
-              <object class="GtkBuilderListItemFactory">
-                <property name="bytes"><![CDATA[
-                  <?xml version="1.0" encoding="UTF-8"?>
-                  <interface>
-                    <template class="GtkListItem">
-                      <property name="child">
-                        <object class="GtkImage">
-                          <binding name="icon-name">
-                            <lookup type="FileBrowserView" name="icon-name">
-                              <lookup name="item">GtkListItem</lookup>
-                            </lookup>
-                          </binding>
-                          <binding name="tooltip-text">
-                            <lookup type="FileBrowserView" name="title">
-                              <lookup name="item">GtkListItem</lookup>
-                            </lookup>
-                          </binding>
-                        </object>
-                      </property>
-                    </template>
-                  </interface>
-                ]]></property>
-              </object>
-            </property>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child>
-      <object class="GtkScrolledWindow">
-        <property name="can-focus">1</property>
-        <child>
-          <object class="GtkGridView" id="view">
-            <property name="model">selection_model</property>
-            <property name="max-columns">15</property>
-            <binding name="factory">
-              <lookup name="factory" type="FileBrowserView">
-                <lookup name="selected-item">selected-view</lookup>
-              </lookup>
-            </binding>
-            <binding name="orientation">
-              <lookup name="orientation" type="FileBrowserView">
-                <lookup name="selected-item">selected-view</lookup>
-              </lookup>
-            </binding>
-            <!--<signal name="activate" handler="filebrowser_view_activated_cb" object="dirlist" swapped="no"/>-->
-          </object>
-        </child>
-      </object>
-    </child>
   </object>
 </interface>
