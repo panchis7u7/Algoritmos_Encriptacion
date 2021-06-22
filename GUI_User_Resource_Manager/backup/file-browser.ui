@@ -9,7 +9,7 @@
         <child>
           <object class="GtkButton">
             <property name="icon-name">go-up-symbolic</property>
-              <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/>
+            <signal name="clicked" handler="filebrowser_up_clicked_cb" object="dirlist" swapped="no"/>
           </object>
         </child>
         <child type="end">

@@ -5,7 +5,6 @@
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
-#include "../headers/fileBrowserView.h"
 
 static void main_app_window_class_init(MainAppWindowClass* class);
 static void main_app_window_dispose(GObject* object);
@@ -25,6 +24,7 @@ struct _MainAppWindow {
     GtkWidget* commandEntry;
     GtkWidget* btnCommandSubmit;
     GtkWidget* stack;
+    GtkWidget* flowbox;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,7 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, commandEntry);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, btnCommandSubmit);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, stack);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, flowbox);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
@@ -74,7 +75,9 @@ static void main_app_window_init(MainAppWindow* window){
   menu = G_MENU_MODEL(gtk_builder_get_object(builder, "menu"));
   gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(window->gears), menu);
 
-  window->stack = GTK_WIDGET(gtk_builder_get_object(builder, "stack"));
+  //window->stack = GTK_WIDGET(gtk_builder_get_object(builder, "stack"));
+  //window->flowbox = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox"));
+  gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(window->flowbox), 10);
 
   g_object_unref(builder);
 
@@ -174,6 +177,26 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     g_print("%s", substring);
     char* file = strtok((char*)text, "[");
     g_print("%s", file);
+
+    DIR *dir;
+    struct dirent *ent;
+    if ((dir = opendir ("/")) != NULL) {
+      /* print all the files and directories within directory */
+      while ((ent = readdir (dir)) != NULL) {
+        g_print ("%s\n", ent->d_name);
+
+        GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+        gtk_box_append(GTK_BOX(box), gtk_button_new_from_icon_name("folder-open"));
+        gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+
+        gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
+      }
+      closedir (dir);
+    } else {
+      /* could not open directory */
+      g_printerr ("error");
+    }
+
   } else if((substring = strstr(text, "ls")) != NULL){
     g_print("%s", substring);
   } else if ((substring = strstr(text, "cat")) != NULL){
