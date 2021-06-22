@@ -4,6 +4,5 @@
     <file preprocess="xml-stripblanks">ui/window.ui</file>
     <file preprocess="xml-stripblanks">ui/gears-menu.ui</file>
     <file preprocess="xml-stripblanks">ui/preferences.ui</file>
-    <file>css/fileBrowser.css</file>
   </gresource>
 </gresources>
