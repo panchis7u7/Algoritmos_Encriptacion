@@ -31,6 +31,8 @@ struct _MainAppWindow {
   GtkWidget* entryChmodFileRoute;
   GtkWidget* comboUsers;
   GtkWidget* comboPermissions;
+  GtkWidget* entryAddUser;
+  GtkWidget* entryUserPassword;
 };
 
 char* fileImages[] = {
@@ -56,9 +58,13 @@ void catFile(MainAppWindow* window, char* filePath);
 void copyFile(MainAppWindow* window);
 void chownFile(MainAppWindow* window);
 void chmodFile(MainAppWindow* window);
+void addUser(MainAppWindow* window);
+void delUser(MainAppWindow* window);
 void btn_copy_pressed(GtkButton* button,  MainAppWindow* window);
 void btn_chown_pressed(GtkButton* button, MainAppWindow* window);
 void btn_chmod_pressed(GtkButton* button, MainAppWindow* window);
+void btn_adduser_pressed(GtkButton* button, MainAppWindow* window);
+void btn_deluser_pressed(GtkButton* button, MainAppWindow* window);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -96,6 +102,8 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_copy_pressed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_chown_pressed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_chmod_pressed);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_adduser_pressed);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_deluser_pressed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -259,23 +267,12 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     g_print("\nDirectory=> %s\n", rest);
     catFile(window, rest);
 
-  } else if ((substring = strstr(text, "cp")) != NULL){
-    
-    copyFile(window);
-
-  } else if ((substring = strstr(text, "chown")) != NULL){
-    
-    chownFile(window);
-
-  } else if ((substring = strstr(text, "chmod")) != NULL){
-    
-    chmodFile(window);
-
-  } else if ((substring = strstr(text, "adduser")) != NULL){
-    g_print("%s", substring);
-  } else if ((substring = strstr(text, "deluser")) != NULL){
-    g_print("%s", substring);
-  } else {
+  } else if ((substring = strstr(text, "cp"))     != NULL) { copyFile(window); } 
+  else if ((substring = strstr(text, "chown"))    != NULL) { chownFile(window); } 
+  else if ((substring = strstr(text, "chmod"))    != NULL) { chmodFile(window); } 
+  else if ((substring = strstr(text, "adduser"))  != NULL) { addUser(window); } 
+  else if ((substring = strstr(text, "deluser"))  != NULL) { delUser(window); }
+  else {
     g_print("Not found");
   }
 }
@@ -482,6 +479,24 @@ void btn_chmod_pressed(GtkButton* button, MainAppWindow* window){
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
+void addUser(MainAppWindow* window) { gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "AddUserPage"); }
+
+void btn_adduser_pressed(GtkButton* button, MainAppWindow* window) {
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void delUser(MainAppWindow* window) { gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "DelUserPage"); }
+
+void btn_deluser_pressed(GtkButton* button, MainAppWindow* window) {
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////
+
 static GtkTreeModel* create_completion_model(void){
   const char* commands[] = {
     "ls [dir]",
@@ -491,8 +506,8 @@ static GtkTreeModel* create_completion_model(void){
     "pwd",
     "chown",
     "chmod",
-    "adduser [user_name]",
-    "deluser [user_name]",
+    "adduser",
+    "deluser",
     NULL
   };
 
