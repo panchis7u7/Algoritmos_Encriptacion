@@ -91,8 +91,6 @@ static void main_app_window_init(MainAppWindow* window){
   menu = G_MENU_MODEL(gtk_builder_get_object(builder, "menu"));
   gtk_menu_button_set_menu_model(GTK_MENU_BUTTON(window->gears), menu);
 
-  //window->stack = GTK_WIDGET(gtk_builder_get_object(builder, "stack"));
-  //window->flowbox = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox"));
   gtk_stack_set_transition_type (GTK_STACK(window->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
   gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(window->flowbox), 6);
   gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(window->flowbox), GTK_SELECTION_SINGLE|GTK_SELECTION_MULTIPLE);
@@ -236,6 +234,8 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
 void listDirs(MainAppWindow* window, char* directory, lsType type){
   char buffer[255];
   struct stat buf;
+  GtkLabel* label;
+
   gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "FilesPage");
   DIR* dir;
   struct dirent* ent;
@@ -253,9 +253,13 @@ void listDirs(MainAppWindow* window, char* directory, lsType type){
         case SHOW_ALL:
           if(stat(directory, &buf) >= 0){
             snprintf(buffer, 255, "%s\nDueno: %s\nGrupo: %s", ent->d_name, getpwuid(buf.st_uid)->pw_name, getgrgid(buf.st_gid)->gr_name);
-            gtk_box_append(GTK_BOX(box), gtk_label_new(buffer));
+            label = GTK_LABEL(gtk_label_new(buffer));
+            gtk_label_set_justify(label, GTK_JUSTIFY_CENTER);
+            gtk_box_append(GTK_BOX(box), GTK_WIDGET(label));
           } else {
-            gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+            label = GTK_LABEL(gtk_label_new(ent->d_name));
+            gtk_label_set_justify(label, GTK_JUSTIFY_CENTER);
+            gtk_box_append(GTK_BOX(box), GTK_WIDGET(label));
           }
           break;
       };
