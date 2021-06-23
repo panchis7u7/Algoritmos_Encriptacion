@@ -24,6 +24,7 @@ struct _MainAppWindow {
     GtkWidget* btnCommandSubmit;
     GtkWidget* stack;
     GtkWidget* flowbox;
+    GtkWidget* textView;
 };
 
 char* fileImages[] = {
@@ -45,6 +46,7 @@ static void command_changed(GtkEntry* entry, MainAppWindow* window);
 static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
 static GtkTreeModel* create_completion_model(void);
 void listDirs(MainAppWindow* window, char* directory, lsType type);
+void catFile(MainAppWindow* window, char* filePath);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -69,6 +71,7 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, btnCommandSubmit);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, stack);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, flowbox);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, textView);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
@@ -216,7 +219,13 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     listDirs(window, rest, SHOW_SIMPLE);
 
   } else if ((substring = strstr(text, "cat")) != NULL){
-    g_print("%s", substring);
+    
+    char* rest = (char*)directory;
+    char* file = strtok_r((char*)rest, "[", &rest);
+    rest[strlen(rest)-1] = '\0';
+    g_print("\nDirectory=> %s\n", rest);
+    catFile(window, rest);
+
   } else if ((substring = strstr(text, "pwd")) != NULL){
     g_print("%s", substring);
   } else if ((substring = strstr(text, "adduser")) != NULL){
@@ -277,14 +286,40 @@ void listDirs(MainAppWindow* window, char* directory, lsType type){
           }
           break;
       };
-
       gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
     }
     closedir (dir);
   } else {
-    g_printerr ("error");
+    gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "ErrorPage");
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+void catFile(MainAppWindow* window, char* filePath){
+  FILE* fp;
+  struct stat st;
+  int len;
+  char c;
+  char* fileBuffer;
+  gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "CatPage");
+  GtkTextBuffer* buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(window->textView));
+  if((fp = fopen(filePath, "r")) != NULL){
+    stat(filePath, &st);
+    len = st.st_size;
+    g_print("%d", len);
+    fileBuffer = (char*)malloc(sizeof(char)*len);
+    size_t newLen = fread(fileBuffer, sizeof(char), len, fp);
+    g_print("%s", fileBuffer);
+    gtk_text_buffer_set_text(buffer, fileBuffer, len);
+    gtk_text_view_set_buffer(GTK_TEXT_VIEW(window->textView), buffer);
+    free(fileBuffer);
+  } else {
+    gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "ErrorPage");
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
