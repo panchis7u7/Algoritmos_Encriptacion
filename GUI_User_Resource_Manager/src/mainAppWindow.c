@@ -96,6 +96,8 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryChmodFileRoute);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboUsers);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboPermissions);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryAddUser);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryUserPassword);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
@@ -482,7 +484,30 @@ void btn_chmod_pressed(GtkButton* button, MainAppWindow* window){
 void addUser(MainAppWindow* window) { gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "AddUserPage"); }
 
 void btn_adduser_pressed(GtkButton* button, MainAppWindow* window) {
+  //char* username = NULL;
+  //char* password = NULL;
+  GtkEntryBuffer* usernameEntryBuf = gtk_entry_get_buffer(GTK_ENTRY(window->entryAddUser));
+  const char* username = gtk_entry_buffer_get_text(usernameEntryBuf);
+  GtkEntryBuffer* passwordEntryBuf = gtk_entry_get_buffer(GTK_ENTRY(window->entryUserPassword));
+  const char* password = gtk_entry_buffer_get_text(passwordEntryBuf);
 
+  g_print("%s %s", username, password);
+  char userBuf[50];
+  //char passBuf[50];
+
+  if(username != NULL && password != NULL){
+    //snprintf(userBuf, 50, "passwd %s", password);
+    snprintf(userBuf, 50, "adduser %s --disabled-password --gecos \"\"", username);
+    if(system(userBuf) >= 0) {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Creacion de usuario exitoso!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    } else {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error al crear usuario!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -490,7 +515,26 @@ void btn_adduser_pressed(GtkButton* button, MainAppWindow* window) {
 void delUser(MainAppWindow* window) { gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "DelUserPage"); }
 
 void btn_deluser_pressed(GtkButton* button, MainAppWindow* window) {
+  char* user = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(window->comboUsers));
+  char userBuf[50];
 
+  if(user != NULL){
+    snprintf(userBuf, 50, "deluser %s", user);
+    g_print("%s", userBuf);
+    if(system(userBuf) >= 0) {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Eliminacion de usuario exitoso!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    } else {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error al eliminar usuario!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    }
+  } else {
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Seleccione un usuario!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
