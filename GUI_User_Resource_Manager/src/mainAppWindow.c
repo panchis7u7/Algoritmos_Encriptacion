@@ -2,17 +2,14 @@
 #include <glib/gi18n.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
-
-static void main_app_window_class_init(MainAppWindowClass* class);
-static void main_app_window_dispose(GObject* object);
-static void main_app_window_init(MainAppWindow* window);
-static void command_changed(GtkEntry* entry, MainAppWindow* window);
-static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
-static GtkTreeModel* create_completion_model(void);
-void listDirs(MainAppWindow* window, char* directory);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -33,7 +30,20 @@ char* fileImages[] = {
   "/usr/share/icons/Yaru/256x256@2x/mimetypes/text.png"
 };
 
+typedef enum {
+  SHOW_SIMPLE = 1,
+  SHOW_ALL = 2
+} lsType;
+
 ///////////////////////////////////////////////////////////////////////////////////////
+
+static void main_app_window_class_init(MainAppWindowClass* class);
+static void main_app_window_dispose(GObject* object);
+static void main_app_window_init(MainAppWindow* window);
+static void command_changed(GtkEntry* entry, MainAppWindow* window);
+static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
+static GtkTreeModel* create_completion_model(void);
+void listDirs(MainAppWindow* window, char* directory, lsType type);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -191,28 +201,12 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
   }
 
   if((substring = strstr(directory, "ls -la")) != NULL){
-    g_print("%s", substring);
-    char* file = strtok((char*)text, "[");
-    g_print("%s", file);
 
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir ("/")) != NULL) {
-      while ((ent = readdir (dir)) != NULL) {
-        g_print ("\n%s, %d\n", ent->d_name, ent->d_type);
-
-        GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        GtkWidget* imagen = gtk_image_new_from_file("/usr/share/icons/Yaru/256x256@2x/status/folder-open.png");
-        gtk_image_set_pixel_size(GTK_IMAGE(imagen), 64);
-        gtk_box_append(GTK_BOX(box), imagen);
-        gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
-
-        gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
-      }
-      closedir (dir);
-    } else {
-      g_printerr ("error");
-    }
+    char* rest = (char*)directory;
+    char* file = strtok_r((char*)rest, "[", &rest);
+    g_print("\nDirectory=> %s\n", rest);
+    rest[strlen(rest)-1] = '\0';
+    listDirs(window, rest, SHOW_ALL);
 
   } else if((substring = strstr(directory, "ls")) != NULL){
 
@@ -220,7 +214,7 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     char* file = strtok_r((char*)rest, "[", &rest);
     g_print("\nDirectory=> %s\n", rest);
     rest[strlen(rest)-1] = '\0';
-    listDirs(window, rest);
+    listDirs(window, rest, SHOW_SIMPLE);
 
   } else if ((substring = strstr(text, "cat")) != NULL){
     g_print("%s", substring);
@@ -233,29 +227,39 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
   } else {
     g_print("Not found");
   }
-
-  /*GtkWidget* win;
-  win = do_listview_filebrowser(GTK_WIDGET(window));*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 //Events.
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void listDirs(MainAppWindow* window, char* directory){
+void listDirs(MainAppWindow* window, char* directory, lsType type){
+  char buffer[255];
+  struct stat buf;
   gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "FilesPage");
   DIR* dir;
   struct dirent* ent;
   if ((dir = opendir(directory)) != NULL) {
     while ((ent = readdir (dir)) != NULL) {
       GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-
       GtkWidget* imagen = gtk_image_new_from_file(fileImages[((ent->d_type == DT_DIR)*0) + ((ent->d_type == DT_REG))]);
-
-      //GtkWidget* imagen = gtk_image_new_from_file("/usr/share/icons/Yaru/256x256@2x/status/folder-open.png");
       gtk_image_set_pixel_size(GTK_IMAGE(imagen), 64);
       gtk_box_append(GTK_BOX(box), imagen);
-      gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+
+      switch(type) {
+        case SHOW_SIMPLE:
+          gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+          break;
+        case SHOW_ALL:
+          if(stat(directory, &buf) >= 0){
+            snprintf(buffer, 255, "%s\nDueno: %s\nGrupo: %s", ent->d_name, getpwuid(buf.st_uid)->pw_name, getgrgid(buf.st_gid)->gr_name);
+            gtk_box_append(GTK_BOX(box), gtk_label_new(buffer));
+          } else {
+            gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+          }
+          break;
+      };
+
       gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
     }
     closedir (dir);
