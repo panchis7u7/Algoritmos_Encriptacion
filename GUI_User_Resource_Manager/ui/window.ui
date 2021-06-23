@@ -179,8 +179,17 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="entryChownFileRoute">
-                        <property name="placeholder-text">Ruta archivo a modificar...</property>
+                      <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <child>
+                          <object class="GtkComboBoxText" id="comboUsers"></object>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryChownFileRoute">
+                            <property name="placeholder-text">Ruta archivo a modificar...</property>
+                            <property name="hexpand">True</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>
@@ -219,7 +228,7 @@
                       <object class="GtkBox">
                         <property name="orientation">horizontal</property>
                         <child>
-                          <object class="GtkComboBox" id="comboPermissions">
+                          <object class="GtkComboBoxText" id="comboPermissions">
                           </object>
                         </child>
                         <child>
@@ -235,7 +244,7 @@
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Cambiar permiso</property>
-                        <signal name="clicked" handler="btn_chown_pressed"/>
+                        <signal name="clicked" handler="btn_chmod_pressed"/>
                       </object>
                     </child>
                   </object>

@@ -17,18 +17,20 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 struct _MainAppWindow {
-    GtkApplicationWindow parent;
-    GSettings* settings;
-    GtkWidget* gears;
-    GtkWidget* commandEntry;
-    GtkWidget* btnCommandSubmit;
-    GtkWidget* stack;
-    GtkWidget* flowbox;
-    GtkWidget* textView;
-    GtkWidget* sourceEntryRoute;
-    GtkWidget* destEntryRoute;
-    GtkWidget* entryChownFileRoute;
-    GtkWidget* entryChmodFileRoute;
+  GtkApplicationWindow parent;
+  GSettings* settings;
+  GtkWidget* gears;
+  GtkWidget* commandEntry;
+  GtkWidget* btnCommandSubmit;
+  GtkWidget* stack;
+  GtkWidget* flowbox;
+  GtkWidget* textView;
+  GtkWidget* sourceEntryRoute;
+  GtkWidget* destEntryRoute;
+  GtkWidget* entryChownFileRoute;
+  GtkWidget* entryChmodFileRoute;
+  GtkWidget* comboUsers;
+  GtkWidget* comboPermissions;
 };
 
 char* fileImages[] = {
@@ -86,6 +88,8 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, destEntryRoute);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryChownFileRoute);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryChmodFileRoute);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboUsers);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboPermissions);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
@@ -115,6 +119,20 @@ static void main_app_window_init(MainAppWindow* window){
   gtk_stack_set_transition_type (GTK_STACK(window->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
   gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(window->flowbox), 6);
   gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(window->flowbox), GTK_SELECTION_SINGLE|GTK_SELECTION_MULTIPLE);
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboPermissions), "Lectura");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboPermissions), "Escritura");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboPermissions), "Ejecucion");
+
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsers), "root");
+  DIR* dir;
+  struct dirent* ent;
+  if ((dir = opendir("/home/")) != NULL) {
+    while ((ent = readdir (dir)) != NULL) {
+      if(ent->d_name[0] != '.')
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsers), ent->d_name);
+    }
+  }
+
 
   g_object_unref(builder);
 
@@ -400,7 +418,28 @@ void chownFile(MainAppWindow* window){
 }
 
 void btn_chown_pressed(GtkButton* button, MainAppWindow* window){
-  g_print("Hola chown!");
+  char* owner = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(window->comboUsers));
+  GtkEntryBuffer* fileRouteBuffer = gtk_entry_get_buffer(GTK_ENTRY(window->entryChownFileRoute));
+  const char* fileRoute = gtk_entry_buffer_get_text(fileRouteBuffer);
+  char commandBuf[50];
+
+  if(owner != NULL){
+    snprintf(commandBuf, 50, "chown %s %s", owner, fileRoute);
+    if(system(commandBuf) >= 0){
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cambio de dueño exitoso!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    } else {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error! Archivo no encontrado!");
+        g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+        gtk_widget_show(dialog); 
+    }
+  } else {
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Necesita seleccionar el dueño del archivo!");
+    g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+    gtk_widget_show(dialog);
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -410,7 +449,35 @@ void chmodFile(MainAppWindow* window){
 }
 
 void btn_chmod_pressed(GtkButton* button, MainAppWindow* window){
-  g_print("Hola chmod!");
+  char* permission = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(window->comboPermissions));
+  GtkEntryBuffer* fileRouteBuffer = gtk_entry_get_buffer(GTK_ENTRY(window->entryChmodFileRoute));
+  const char* fileRoute = gtk_entry_buffer_get_text(fileRouteBuffer);
+  char commandBuf[50];
+  char* permissions[3] = {
+    "r",
+    "w",
+    "x"
+  };
+
+  if(permission != NULL){
+    snprintf(commandBuf, 50, "chmod +%s %s", 
+          (permissions[((strncmp(permission, "Lectura", 7) == 0)*(0)) + ((strncmp(permission, "Escritura", 9) == 0)*(1)) + ((strncmp(permission, "Ejecucion", 9) == 0)*(2))]),
+          fileRoute);
+    
+    if(system(commandBuf) >= 0){
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Cambio de permiso exitoso!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    } else {
+      GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error! Archivo no encontrado!");
+      g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+      gtk_widget_show(dialog); 
+    }
+  } else {
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Necesita seleccionar un permiso!");
+    g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+    gtk_widget_show(dialog);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
