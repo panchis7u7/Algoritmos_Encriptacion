@@ -47,6 +47,7 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
 static GtkTreeModel* create_completion_model(void);
 void listDirs(MainAppWindow* window, char* directory, lsType type);
 void catFile(MainAppWindow* window, char* filePath);
+void copyFile(MainAppWindow* window);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -226,8 +227,10 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     g_print("\nDirectory=> %s\n", rest);
     catFile(window, rest);
 
-  } else if ((substring = strstr(text, "pwd")) != NULL){
-    g_print("%s", substring);
+  } else if ((substring = strstr(text, "cp")) != NULL){
+    
+    copyFile(window);
+
   } else if ((substring = strstr(text, "adduser")) != NULL){
     g_print("%s", substring);
   } else if ((substring = strstr(text, "deluser")) != NULL){
@@ -307,10 +310,8 @@ void catFile(MainAppWindow* window, char* filePath){
   if((fp = fopen(filePath, "r")) != NULL){
     stat(filePath, &st);
     len = st.st_size;
-    g_print("%d", len);
     fileBuffer = (char*)malloc(sizeof(char)*len);
     size_t newLen = fread(fileBuffer, sizeof(char), len, fp);
-    g_print("%s", fileBuffer);
     gtk_text_buffer_set_text(buffer, fileBuffer, len);
     gtk_text_view_set_buffer(GTK_TEXT_VIEW(window->textView), buffer);
     free(fileBuffer);
@@ -321,7 +322,9 @@ void catFile(MainAppWindow* window, char* filePath){
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////
+void copyFile(MainAppWindow* window) {
+  gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "CopyPage");
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -330,6 +333,7 @@ static GtkTreeModel* create_completion_model(void){
     "ls [dir]",
     "ls -la [dir]",
     "cat [file_path]",
+    "cp",
     "pwd",
     "adduser [user_name]",
     "deluser [user_name]",
