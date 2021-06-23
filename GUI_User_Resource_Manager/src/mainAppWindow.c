@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#include <time.h>
 
 #include "../headers/mainApp.h"
 #include "../headers/mainAppWindow.h"
@@ -232,8 +233,10 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void listDirs(MainAppWindow* window, char* directory, lsType type){
-  char buffer[255];
+  char buffer[512];
   struct stat buf;
+  struct tm creation;
+  struct tm modification;
   GtkLabel* label;
 
   gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "FilesPage");
@@ -252,7 +255,18 @@ void listDirs(MainAppWindow* window, char* directory, lsType type){
           break;
         case SHOW_ALL:
           if(stat(directory, &buf) >= 0){
-            snprintf(buffer, 255, "%s\nDueno: %s\nGrupo: %s", ent->d_name, getpwuid(buf.st_uid)->pw_name, getgrgid(buf.st_gid)->gr_name);
+            creation = *(gmtime(&buf.st_ctim));
+            modification = *(gmtime(&buf.st_mtim));
+            snprintf(buffer, 512, "%s\nDueno: %s\nGrupo: %s\nCreacion:\n%d-%d-%d %d:%d:%d\nModificacion:\n%d-%d-%d %d:%d:%d\nAtributos:\n%c%c%c", 
+                    ent->d_name, 
+                    getpwuid(buf.st_uid)->pw_name, 
+                    getgrgid(buf.st_gid)->gr_name,
+                    creation.tm_mday, creation.tm_mon, creation.tm_year + 1900, creation.tm_hour, creation.tm_min, creation.tm_sec,
+                    modification.tm_mday, modification.tm_mon, modification.tm_year + 1900, modification.tm_hour, modification.tm_min, modification.tm_sec,
+                    ((buf.st_mode & R_OK) ? 'r' : '-'),
+                    ((buf.st_mode & W_OK) ? 'w' : '-'),
+                    ((buf.st_mode & X_OK) ? 'x' : '-'));
+
             label = GTK_LABEL(gtk_label_new(buffer));
             gtk_label_set_justify(label, GTK_JUSTIFY_CENTER);
             gtk_box_append(GTK_BOX(box), GTK_WIDGET(label));
