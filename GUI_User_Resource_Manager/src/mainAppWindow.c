@@ -25,6 +25,8 @@ struct _MainAppWindow {
     GtkWidget* stack;
     GtkWidget* flowbox;
     GtkWidget* textView;
+    GtkWidget* sourceEntryRoute;
+    GtkWidget* destEntryRoute;
 };
 
 char* fileImages[] = {
@@ -48,6 +50,7 @@ static GtkTreeModel* create_completion_model(void);
 void listDirs(MainAppWindow* window, char* directory, lsType type);
 void catFile(MainAppWindow* window, char* filePath);
 void copyFile(MainAppWindow* window);
+void btn_copy_pressed(GtkButton* button, MainAppWindow* window);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,9 +76,12 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, stack);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, flowbox);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, textView);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, sourceEntryRoute);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, destEntryRoute);
 
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_changed);
   gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), command_submit_pressed);
+  gtk_widget_class_bind_template_callback (GTK_WIDGET_CLASS (class), btn_copy_pressed);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -180,9 +186,7 @@ static void main_app_window_dispose(GObject* object){
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-static void command_changed(GtkEntry* entry, MainAppWindow* window){
-  
-}
+static void command_changed(GtkEntry* entry, MainAppWindow* window){}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -324,6 +328,54 @@ void catFile(MainAppWindow* window, char* filePath){
 
 void copyFile(MainAppWindow* window) {
   gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "CopyPage");
+}
+
+void btn_copy_pressed(GtkButton* button, MainAppWindow* window){
+  GtkEntryBuffer* sourceBuf = gtk_entry_get_buffer(GTK_ENTRY(window->sourceEntryRoute));
+  GtkEntryBuffer* destinyBuf = gtk_entry_get_buffer(GTK_ENTRY(window->destEntryRoute));
+  const char* sourceRoute = gtk_entry_buffer_get_text(sourceBuf);
+  const char* destinyRoute = gtk_entry_buffer_get_text(destinyBuf);
+  //|| strlen(destinyRoute) > 0
+
+  char workingDirectoryBuf[255];
+  char commandBuf[255];
+
+  if(strlen(sourceRoute) > 0){
+    if(strlen(destinyRoute) > 0){
+      snprintf(commandBuf, 255, "cp %s %s.", sourceRoute, destinyRoute);
+      g_print("%s", commandBuf);
+      
+      if(system(commandBuf) >= 0){
+        GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Copiado exitoso!");
+        g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+        gtk_widget_show(dialog); 
+      } else {
+        GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error! Archivo no encontrado!");
+        g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+        gtk_widget_show(dialog); 
+      }
+      
+    } else {
+      getcwd(workingDirectoryBuf, 255);
+      snprintf(commandBuf, 255, "cp %s .", sourceRoute);
+      g_print("%s", commandBuf);
+
+      if(system(commandBuf) >= 0){
+        GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Copiado exitoso!");
+        g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+        gtk_widget_show(dialog); 
+      } else {
+        GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Error! Archivo no encontrado!");
+        g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+        gtk_widget_show(dialog); 
+      }
+    }
+  } else {
+    GtkWidget* dialog = gtk_message_dialog_new(GTK_WINDOW(window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "Porfavor rellene los campos!");
+    g_signal_connect (dialog, "response", G_CALLBACK (gtk_window_destroy), NULL);
+    gtk_widget_show(dialog);  
+    g_print("hola");
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
