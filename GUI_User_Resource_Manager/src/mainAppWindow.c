@@ -12,6 +12,7 @@ static void main_app_window_init(MainAppWindow* window);
 static void command_changed(GtkEntry* entry, MainAppWindow* window);
 static void command_submit_pressed(GtkButton *button, MainAppWindow* window);
 static GtkTreeModel* create_completion_model(void);
+void listDirs(MainAppWindow* window, char* directory);
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
@@ -25,6 +26,11 @@ struct _MainAppWindow {
     GtkWidget* btnCommandSubmit;
     GtkWidget* stack;
     GtkWidget* flowbox;
+};
+
+char* fileImages[] = {
+  "/usr/share/icons/Yaru/256x256@2x/status/folder-open.png",
+  "/usr/share/icons/Yaru/256x256@2x/mimetypes/text.png"
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +83,7 @@ static void main_app_window_init(MainAppWindow* window){
 
   //window->stack = GTK_WIDGET(gtk_builder_get_object(builder, "stack"));
   //window->flowbox = GTK_WIDGET(gtk_builder_get_object(builder, "flowbox"));
+  gtk_stack_set_transition_type (GTK_STACK(window->stack), GTK_STACK_TRANSITION_TYPE_SLIDE_UP_DOWN);
   gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(window->flowbox), 6);
   gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(window->flowbox), GTK_SELECTION_SINGLE|GTK_SELECTION_MULTIPLE);
 
@@ -164,13 +171,6 @@ static void command_changed(GtkEntry* entry, MainAppWindow* window){
   
 }
 
-
-void forEachChild(GtkFlowBox *box, GtkFlowBoxChild *child, gpointer user_data){
-  g_print("hola");
-  gtk_flow_box_remove(box, GTK_WIDGET(child));
-  //g_object_unref(child);
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -190,7 +190,7 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     children = children->next;
   }
 
-  if((substring = strstr(directory, "ls -l")) != NULL){
+  if((substring = strstr(directory, "ls -la")) != NULL){
     g_print("%s", substring);
     char* file = strtok((char*)text, "[");
     g_print("%s", file);
@@ -198,9 +198,8 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     DIR *dir;
     struct dirent *ent;
     if ((dir = opendir ("/")) != NULL) {
-      /* print all the files and directories within directory */
       while ((ent = readdir (dir)) != NULL) {
-        g_print ("%s\n", ent->d_name);
+        g_print ("\n%s, %d\n", ent->d_name, ent->d_type);
 
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
         GtkWidget* imagen = gtk_image_new_from_file("/usr/share/icons/Yaru/256x256@2x/status/folder-open.png");
@@ -216,28 +215,13 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
     }
 
   } else if((substring = strstr(directory, "ls")) != NULL){
+
     char* rest = (char*)directory;
     char* file = strtok_r((char*)rest, "[", &rest);
-    g_print("%s", rest);
+    g_print("\nDirectory=> %s\n", rest);
     rest[strlen(rest)-1] = '\0';
+    listDirs(window, rest);
 
-    DIR *dir;
-    struct dirent *ent;
-    if ((dir = opendir(rest)) != NULL) {
-      /* print all the files and directories within directory */
-      while ((ent = readdir (dir)) != NULL) {
-        GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        GtkWidget* imagen = gtk_image_new_from_file("/usr/share/icons/Yaru/256x256@2x/status/folder-open.png");
-        gtk_image_set_pixel_size(GTK_IMAGE(imagen), 64);
-        gtk_box_append(GTK_BOX(box), imagen);
-        gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
-
-        gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
-      }
-      closedir (dir);
-    } else {
-      g_printerr ("error");
-    }
   } else if ((substring = strstr(text, "cat")) != NULL){
     g_print("%s", substring);
   } else if ((substring = strstr(text, "pwd")) != NULL){
@@ -255,13 +239,39 @@ static void command_submit_pressed(GtkButton *button, MainAppWindow* window){
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
+//Events.
+///////////////////////////////////////////////////////////////////////////////////////
+
+void listDirs(MainAppWindow* window, char* directory){
+  gtk_stack_set_visible_child_name(GTK_STACK(window->stack), "FilesPage");
+  DIR* dir;
+  struct dirent* ent;
+  if ((dir = opendir(directory)) != NULL) {
+    while ((ent = readdir (dir)) != NULL) {
+      GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+
+      GtkWidget* imagen = gtk_image_new_from_file(fileImages[((ent->d_type == DT_DIR)*0) + ((ent->d_type == DT_REG))]);
+
+      //GtkWidget* imagen = gtk_image_new_from_file("/usr/share/icons/Yaru/256x256@2x/status/folder-open.png");
+      gtk_image_set_pixel_size(GTK_IMAGE(imagen), 64);
+      gtk_box_append(GTK_BOX(box), imagen);
+      gtk_box_append(GTK_BOX(box), gtk_label_new(ent->d_name));
+      gtk_flow_box_insert(GTK_FLOW_BOX(window->flowbox), box, -1);
+    }
+    closedir (dir);
+  } else {
+    g_printerr ("error");
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 static GtkTreeModel* create_completion_model(void){
   const char* commands[] = {
     "ls [dir]",
-    "ls -l [dir]",
+    "ls -la [dir]",
     "cat [file_path]",
     "pwd",
     "adduser [user_name]",

@@ -52,8 +52,20 @@
           <object class="GtkStack" id="stack">
             <child>
               <object class="GtkStackPage">
-                <property name="name">page2</property>
-                <property name="title" translatable="yes">Page 2</property>
+                <property name="name">Empty</property>
+                <property name="title" translatable="yes">Empty</property>
+                <property name="child">
+                  <object class="GtkLabel">
+                    <property name="label">No hay nada que mostrar aqui...</property>
+                    <property name="vexpand">True</property>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">FilesPage</property>
+                <property name="title" translatable="yes">FilesPage</property>
                 <property name="child">
                   <object class="GtkScrolledWindow">
                     <property name="vexpand">True</property>
