@@ -30,6 +30,7 @@ struct _MainAppWindow {
   GtkWidget* entryChownFileRoute;
   GtkWidget* entryChmodFileRoute;
   GtkWidget* comboUsers;
+  GtkWidget* comboUsersChown;
   GtkWidget* comboPermissions;
   GtkWidget* entryAddUser;
   GtkWidget* entryUserPassword;
@@ -95,6 +96,7 @@ static void main_app_window_class_init(MainAppWindowClass* class){
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryChownFileRoute);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryChmodFileRoute);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboUsers);
+  gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboUsersChown);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, comboPermissions);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryAddUser);
   gtk_widget_class_bind_template_child (GTK_WIDGET_CLASS (class), MainAppWindow, entryUserPassword);
@@ -134,15 +136,18 @@ static void main_app_window_init(MainAppWindow* window){
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboPermissions), "Ejecucion");
 
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsers), "root");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsersChown), "root");
   DIR* dir;
   struct dirent* ent;
   if ((dir = opendir("/home/")) != NULL) {
     while ((ent = readdir (dir)) != NULL) {
-      if(ent->d_name[0] != '.')
+      if(ent->d_name[0] != '.'){
         gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsers), ent->d_name);
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(window->comboUsersChown), ent->d_name);
+      }
     }
   }
-
+  closedir (dir);
 
   g_object_unref(builder);
 
@@ -417,7 +422,7 @@ void chownFile(MainAppWindow* window){
 }
 
 void btn_chown_pressed(GtkButton* button, MainAppWindow* window){
-  char* owner = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(window->comboUsers));
+  char* owner = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(window->comboUsersChown));
   GtkEntryBuffer* fileRouteBuffer = gtk_entry_get_buffer(GTK_ENTRY(window->entryChownFileRoute));
   const char* fileRoute = gtk_entry_buffer_get_text(fileRouteBuffer);
   char commandBuf[50];

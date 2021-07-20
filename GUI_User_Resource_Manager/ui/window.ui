@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <template class="MainAppWindow" parent="GtkApplicationWindow">
-    <property name="title" translatable="yes">User Resource Manager</property>
+    <property name="title" translatable="yes">Administrador de recursos</property>
     <property name="default-width">600</property>
     <property name="default-height">400</property>
     <child type="titlebar">
@@ -56,7 +56,7 @@
                 <property name="title" translatable="yes">Empty</property>
                 <property name="child">
                   <object class="GtkLabel">
-                    <property name="label">No hay nada que mostrar aqui...</property>
+                    <property name="label">Hola! Bienvenido!</property>
                     <property name="vexpand">True</property>
                   </object>
                 </property>
@@ -182,7 +182,7 @@
                       <object class="GtkBox">
                         <property name="orientation">horizontal</property>
                         <child>
-                          <object class="GtkComboBoxText" id="comboUsers"></object>
+                          <object class="GtkComboBoxText" id="comboUsersChown"></object>
                         </child>
                         <child>
                           <object class="GtkEntry" id="entryChownFileRoute">
